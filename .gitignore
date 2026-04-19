@@ -1,0 +1,12 @@
+neo4j/data/
+neo4j/logs/
+neo4j/plugins/
+.env
+*.log
+.DS_Store
+neo4j/data/
+neo4j/logs/
+neo4j/plugins/
+.env
+*.log
+.DS_Store

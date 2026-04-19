@@ -1,0 +1,12 @@
+[submodule "dataset/network-management"]
+	path = dataset/network-management
+	url = https://github.com/neo4j-graph-examples/network-management.git
+[submodule "dataset/pole"]
+	path = dataset/pole
+	url = https://github.com/neo4j-graph-examples/pole.git
+[submodule "dataset/recommendations"]
+	path = dataset/recommendations
+	url = https://github.com/neo4j-graph-examples/recommendations.git
+[submodule "dataset/stackoverflow"]
+	path = dataset/stackoverflow
+	url = https://github.com/neo4j-graph-examples/stackoverflow.git

@@ -1,0 +1,28 @@
+{
+    "name": "recommendations",
+    "icon": "documentation/img/icon-movie.svg",
+    "title": "Graph based Recommendations",
+    "description":"Generate personalized real-time recommendations using a dataset of movie reviews",
+    "dbms": [
+      {
+          "dumpFile": "data/recommendations-35.dump",
+          "targetNeo4jVersion":">=3.5.0 <4.0.0",
+          "plugins": ["apoc", "graph-data-science"]
+      },
+      {
+          "dumpFile": "data/recommendations-40.dump",
+          "targetNeo4jVersion": ">=4.0.0 <4.3.0",
+          "plugins": ["apoc", "graph-data-science"]
+      },
+      {
+          "dumpFile": "data/recommendations-43.dump",
+          "targetNeo4jVersion": ">=4.3.0 <5.0.0",
+          "plugins": ["apoc", "graph-data-science"]
+      },
+      {
+          "dumpFile": "data/recommendations-50.dump",
+          "targetNeo4jVersion": ">=5.0.0 <6.0.0",
+          "plugins": ["apoc", "graph-data-science"]
+      }
+  ]
+}

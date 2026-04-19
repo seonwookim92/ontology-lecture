@@ -1,0 +1,25 @@
+== recommendations-5.26.dump
+
+The file was dumped from Neo4j 5.26.8, and has `aligned` as store format.
+It does *not* contain a vector index.
+
+
+== recommendations-5.26-block.dump
+
+The file was dumped from Neo4j 5.26.8, and has `block` as store format.
+It does *not* contain a vector index.
+
+
+== recommendations-embeddings-aligned-5.26.dump
+
+The file was dumped from Neo4j 5.26.8, and has `aligned` as store format.
+It does *not* contain a vector index.
+
+It is based on `recommendations-*.dump`, enriched with embeddings provided from https://data.neo4j.com/rec-embed/README.html on `Movie` nodes, under the property `embedding`.
+
+== recommendations-embeddings-block-5.26.dump
+
+The file was dumped from Neo4j 5.26.8, and has `block` as store format.
+It does *not* contain a vector index.
+
+It is based on `recommendations-*.dump`, enriched with embeddings provided from https://data.neo4j.com/rec-embed/README.html on `Movie` nodes, under the property `embedding`.

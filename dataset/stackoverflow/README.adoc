@@ -1,0 +1,141 @@
+//Stack Overflow 
+:name: stackoverflow
+//graph example description
+:long-name: Stack Overflow Questions, Answers, Tags, and Comments 
+:description: Stack Overflow questions, answers, tags, and comments and the relationships between them.
+//icon representing graph example
+:icon: documentation/img/icon.svg
+//associated search tags, separate multiple tags with comma
+:tags: stackoverflow-example-data, stackoverflow-dataset, stackoverflow-template-data, stackoverflow-example, stackoverflow-template, stackoverflow-model
+//graph example author
+:author: Neo4j Devrel
+//true if this example is available on the demodb. Set to false if not used
+:demodb: false
+//data flat files (csv, json, etc). Set to false if not used
+:data: false
+//use a script to generate/process data? Set to either path for script, or false if not used
+:use-load-script: false
+//use a graph dump file for initial data set? Set to either path for dump file, or false if not used
+:use-dump-file: data/stackoverflow-4-3-1.dump
+//if a zip file exists for the data, specify here. Set to false if not used
+:zip-file: false
+//use a plugin for the database, separate multiple plugins with comma. 'public' plugins are apoc, graph-algorithms. 
+//other algorithms are specified by path, e.g. apoc,graph-algorithms; Set to false if not used
+:use-plugin: apoc
+//target version of the database this example should run on
+:target-db-version: 4.0,4.3
+//specify a Bloom perspective, or false if not used
+:bloom-perspective: false
+//guide for the graph example. Should be friendly enough to be converted into various document formats
+:guide: documentation/stackoverflow.neo4j-browser-guide
+//temporary for rendered guides
+:rendered-guide: https://guides.neo4j.com/sandbox/{name}
+//guide for modeling decisions. Should be friendly enough to be converted into various document formats
+:model: documentation/img/model.svg
+:example: documentation/img/example.png
+:nodes: 6193
+:relationships: 11540
+
+image::{icon}[width=100]
+
+== {long-name} Graph Example
+
+Description: _{description}_
+
+ifeval::[{todo} != false]
+To Do: {todo}
+endif::[]
+
+Nodes {nodes} Relationships {relationships}
+
+.Model
+image::{model}[]
+
+.Example
+image::{example}[width=600]
+
+.Example Query:
+
+:param-name: tagName
+:param-value: neo4j
+
+[source,cypher,role=query-example-params,subs=+attributes]
+----
+:param {param-name} => "{param-value}"
+----
+
+[source,cypher,role=query-example,param-name={param-name},param-value={param-value},result-column=answerer,expected-result="A value"]
+----
+MATCH (t:Tag {name:$tagName})<-[:TAGGED]-(q:Question)<-[:ANSWERED]-(a:Answer {is_accepted:true})<-[:PROVIDED]-(u:User)
+RETURN u.display_name as answerer LIMIT 5
+----
+
+=== Setup
+
+This is for Neo4j version: {target-db-version}
+
+ifeval::[{use-plugin} != false]
+Required plugins: {use-plugin}
+endif::[]
+
+ifeval::[{demodb} != false]
+The database is also available on https://demo.neo4jlabs.com:7473
+
+Username "{name}", password: "{name}", database: "{name}"
+endif::[]
+
+Rendered guide available via: `:play {rendered-guide}`
+
+Unrendered guide: link:{guide}[]
+
+Load graph data via the following:
+
+ifeval::[{data} != false]
+==== Data files: `{data}`
+
+Import flat files (csv, json, etc) using Cypher's https://neo4j.com/docs/cypher-manual/current/clauses/load-csv/[`LOAD CSV`], https://neo4j.com/labs/apoc/[APOC library], or https://neo4j.com/developer/data-import/[other methods].
+endif::[]
+
+ifeval::[{use-dump-file} != false]
+==== Dump file: `{use-dump-file}`
+
+* Drop the file into the `Files` section of a project in Neo4j Desktop. Then choose the option to `Create new DBMS from dump` option from the file options.
+
+* Use the neo4j-admin tool to load data from the command line with the command below.
+
+[source,shell,subs=attributes]
+----
+bin/neo4j-admin load --from {use-dump-file} [--database "database"]
+----
+
+* Upload the dump file to Neo4j Aura via https://console.neo4j.io/#import-instructions
+endif::[]
+
+ifeval::[{use-load-script} != false]
+==== Data load script: `{use-load-script}`
+
+[source,shell,subs=attributes]
+----
+bin/cypher-shell -u neo4j -p "password" -f {use-load-script} [-d "database"]
+----
+
+Or import in Neo4j Browser by dragging or pasting the content of {use-load-script}.
+endif::[]
+
+ifeval::[{zip-file} != false]
+==== Zip file
+
+Download the zip file link:{repo}/raw/master/{name}.zip[{name}.zip] and add it as "project from file" to https://neo4j.com/developer/neo4j-desktop[Neo4j Desktop^].
+endif::[]
+
+=== Code Examples
+
+* link:code/javascript/example.js[JavaScript]
+* link:code/java/Example.java[Java]
+* link:code/csharp/Example.cs[C#]
+* link:code/python/example.py[Python]
+* link:code/go/example.go[Go]
+
+=== Feedback
+
+Feel free to submit issues or pull requests for improvement on this repository.

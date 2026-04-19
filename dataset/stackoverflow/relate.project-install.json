@@ -1,0 +1,23 @@
+{
+    "name": "stackoverflow",
+    "icon": "documentation/img/icon.svg",
+    "title": "StackOverflow Data",
+    "description":"StackOverflow Analysis - Questions, Answers, Tags, Comments",
+    "dbms": [
+      {
+          "scriptFile":"scripts/import.cypher",
+          "targetNeo4jVersion": "^4.3",
+          "plugins": ["apoc"]
+      },
+      {
+        "dumpFile": "data/stackoverflow-43.dump",
+        "targetNeo4jVersion":">=4.3.0 <5.0.0",
+        "plugins": ["apoc"]
+      },
+      {
+        "dumpFile": "data/stackoverflow-50.dump",
+        "targetNeo4jVersion":">=5.0.0 <6.0.0",
+        "plugins": ["apoc"]
+      }
+  ]
+}
