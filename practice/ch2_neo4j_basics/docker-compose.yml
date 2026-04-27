@@ -18,8 +18,8 @@ services:
       - ../../neo4j/import:/var/lib/neo4j/import
       - ../../neo4j/plugins:/plugins
       - ../../dataset:/dataset:ro
-      - ./neo4j_init.sh:/neo4j_init.sh:ro
-    entrypoint: /neo4j_init.sh
+      - ./neo4j_init.sh:/var/lib/neo4j/neo4j_init.sh:ro
+    entrypoint: /var/lib/neo4j/neo4j_init.sh
     restart: unless-stopped
 
 volumes:
