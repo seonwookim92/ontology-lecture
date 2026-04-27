@@ -4,7 +4,7 @@
       "type": "streamable-http",
       "url": "http://neo4j-mcp:8080/mcp",
       "headers": {
-        "Authorization": "Basic bmVvNGo6dGVzdHBhc3N3b3Jk"
+        "Authorization": "Basic bmVvNGo6U3VwZXJTZWNyZXRQYXNzd29yZA=="
       }
     }
   }
