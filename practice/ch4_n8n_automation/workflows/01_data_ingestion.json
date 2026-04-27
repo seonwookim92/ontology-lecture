@@ -1,0 +1,1076 @@
+{
+  "name": "01 Data Ingestion",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        32
+      ],
+      "id": "56597103-cca5-4c14-a611-43e9e980662b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1952,
+        320
+      ],
+      "id": "b70078d0-5e98-463e-a8f2-1b1df69bb8b9",
+      "name": "Parse JSON"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/threat_intel.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        1744,
+        320
+      ],
+      "id": "ee5503f3-3257-43d3-ab27-d9d108d858ae",
+      "name": "Read JSON File"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/security_events.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        320
+      ],
+      "id": "58010b46-baa8-48ed-ab9b-a4287fa59b0e",
+      "name": "Read CSV File"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1008,
+        320
+      ],
+      "id": "87433d87-a70c-4597-90be-529ceb7835a7",
+      "name": "Parse CSV"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const row = item.json;\n\n  return {\n    json: {\n      event_id: String(row.event_id || '').trim(),\n      timestamp: String(row.timestamp || '').trim(),\n      hostname: String(row.hostname || '').trim(),\n      user_id: String(row.user_id || '').trim(),\n      src_ip: String(row.src_ip || '').trim(),\n      dst_ip: String(row.dst_ip || '').trim(),\n      process_name: String(row.process_name || '').trim(),\n\n      domain: String(row.domain || '').trim().toLowerCase(),\n      url: String(row.url || '').trim(),\n\n      file_hash: String(row.file_hash || '').trim().toLowerCase(),\n\n      alert_type: String(row.alert_type || '').trim(),\n      severity: String(row.severity || '').trim(),\n      technique_id: String(row.technique_id || '').trim()\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        320
+      ],
+      "id": "a160b262-ed6a-4c76-a2e1-08c106a2cde6",
+      "name": "Normalize CSV"
+    },
+    {
+      "parameters": {
+        "content": "curl -X POST http://localhost:8082/neo4j/get-schema -H \"Content-Type: application/json\" -d '{\"properties\": {}}'\n\n\ncurl -X POST http://localhost:8080/neo4j/read-cypher \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"query\": \"{{query}}\"\n  }'\n\ncurl -X POST http://localhost:8080/neo4j/write-cypher \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"query\": \"{{query}}\"\n  }'",
+        "height": 272,
+        "width": 784
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -480
+      ],
+      "id": "d50d1157-0825-4598-896f-57759d40c189",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT event_id_unique IF NOT EXISTS\nFOR (e:Event) REQUIRE e.event_id IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        32
+      ],
+      "id": "3d1a47ab-5ab2-4227-9c4b-4c5d3f6167a2",
+      "name": "Setup Constraints",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT host_hostname_unique IF NOT EXISTS\nFOR (h:Host) REQUIRE h.hostname IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        176
+      ],
+      "id": "7b85ce55-e709-4792-b366-933a704ee596",
+      "name": "Setup Constraints1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT user_id_unique IF NOT EXISTS\nFOR (u:User) REQUIRE u.user_id IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        320
+      ],
+      "id": "c1dfab0f-4896-4840-922f-015d687819ae",
+      "name": "Setup Constraints2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT ip_unique IF NOT EXISTS\nFOR (ip:IPAddress) REQUIRE ip.ip IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        16,
+        32
+      ],
+      "id": "d0dda098-fc26-4ec5-986b-86a91750d029",
+      "name": "Setup Constraints3",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT domain_unique IF NOT EXISTS\nFOR (d:Domain) REQUIRE d.domain IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        16,
+        176
+      ],
+      "id": "e5c6f98b-2aee-4e55-85d7-a4075d9a5c4d",
+      "name": "Setup Constraints4",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT url_unique IF NOT EXISTS\nFOR (u:URL) REQUIRE u.url IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        16,
+        320
+      ],
+      "id": "8f816dbc-81d2-46bb-b0b1-efb15a2b74ed",
+      "name": "Setup Constraints5",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT file_hash_unique IF NOT EXISTS\nFOR (f:FileHash) REQUIRE f.hash IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        32
+      ],
+      "id": "8140916c-06c2-49c9-ae73-8902fd486f63",
+      "name": "Setup Constraints6",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT technique_id_unique IF NOT EXISTS\nFOR (t:Technique) REQUIRE t.technique_id IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        176
+      ],
+      "id": "3a5b1873-cf7d-4f2b-9307-d111310e5c6e",
+      "name": "Setup Constraints7",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT intel_id_unique IF NOT EXISTS\nFOR (ti:ThreatIntel) REQUIRE ti.intel_id IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        320
+      ],
+      "id": "43b08ad6-d37b-4dda-ab48-56ce3d9f37a3",
+      "name": "Setup Constraints8",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT actor_name_unique IF NOT EXISTS\nFOR (a:ThreatActor) REQUIRE a.name IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        32
+      ],
+      "id": "fbf6bc81-258c-4a11-84af-7680d439464b",
+      "name": "Setup Constraints9",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT malware_name_unique IF NOT EXISTS\nFOR (m:Malware) REQUIRE m.name IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        176
+      ],
+      "id": "e87ae689-1f5f-4097-92f5-93f3cb8feb59",
+      "name": "Setup Constraints10",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT campaign_name_unique IF NOT EXISTS\nFOR (c:Campaign) REQUIRE c.name IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        320
+      ],
+      "id": "5131309e-c576-425f-81b2-9abdc39d497c",
+      "name": "Setup Constraints11",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "content": "## Setup Constraints\n필수는 아니지만\n스키마에 맞게 깔끔하게 적재하기 위한 \"안전장치\"",
+        "height": 832,
+        "width": 848,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -128
+      ],
+      "id": "d205c340-72ac-41ea-ada6-01fd11889209",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\nconst output = [];\n\nfor (const item of input) {\n  const data = item.json;\n\n  const records = Array.isArray(data) ? data : [data];\n\n  for (const x of records) {\n    output.push({\n      json: {\n        intel_id: String(x.intel_id || '').trim(),\n        source: String(x.source || 'Demo CTI Feed').trim(),\n\n        indicator_value: String(x.indicator_value || '').trim().toLowerCase(),\n        indicator_type: String(x.indicator_type || '').trim().toLowerCase(),\n\n        threat_actor: String(x.threat_actor || '').trim(),\n        actor_origin: String(x.actor_origin || '').trim(),\n        actor_motivation: String(x.actor_motivation || '').trim(),\n\n        malware: String(x.malware || '').trim(),\n        malware_type: String(x.malware_type || '').trim(),\n\n        campaign: String(x.campaign || '').trim(),\n        campaign_description: String(x.campaign_description || '').trim(),\n\n        confidence: Number(x.confidence || 0),\n        first_seen: String(x.first_seen || '').trim(),\n        last_seen: String(x.last_seen || '').trim(),\n\n        techniques: Array.isArray(x.techniques) ? x.techniques : []\n      }\n    });\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2368,
+        320
+      ],
+      "id": "2b035112-4bfc-4df6-a409-fa90dd3a87a8",
+      "name": "Normalize JSON"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        320
+      ],
+      "id": "afbe4bd7-2609-438d-8158-c3f72281cda4",
+      "name": "Split JSON"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.indicator_type }}",
+                    "rightValue": "domain",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "eb874b68-6a9e-409a-882f-3ec9e76f0947"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0db74471-1d32-4fe6-b03c-281f29605a4d",
+                    "leftValue": "={{ $json.indicator_type }}",
+                    "rightValue": "url",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7835d76a-d6d1-47ed-b63b-e6abe6179da1",
+                    "leftValue": "={{ $json.indicator_type }}",
+                    "rightValue": "ip",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ffc697c4-5ff8-4138-a7d8-e7230ac07307",
+                    "leftValue": "={{ $json.indicator_type }}",
+                    "rightValue": "file_hash",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2592,
+        288
+      ],
+      "id": "44d65e23-6882-4b4f-afe0-42839824f804",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "=MERGE (e:Event {event_id: '{{ $json.event_id }}'})\nSET e.timestamp = '{{ $json.timestamp }}',\n    e.alert_type = '{{ $json.alert_type }}',\n    e.severity = '{{ $json.severity }}'\n\nMERGE (h:Host {hostname: '{{ $json.hostname }}'})\nMERGE (u:User {user_id: '{{ $json.user_id }}'})\nMERGE (src:IPAddress {ip: '{{ $json.src_ip }}'})\nMERGE (dst:IPAddress {ip: '{{ $json.dst_ip }}'})\nMERGE (d:Domain {domain: '{{ $json.domain }}'})\nMERGE (url:URL {url: '{{ $json.url }}'})\nMERGE (fh:FileHash {hash: '{{ $json.file_hash }}'})\nMERGE (t:Technique {technique_id: '{{ $json.technique_id }}'})\n\nMERGE (e)-[:OCCURRED_ON]->(h)\nMERGE (e)-[:INITIATED_BY]->(u)\nMERGE (e)-[:FROM_IP]->(src)\nMERGE (e)-[:TO_IP]->(dst)\nMERGE (e)-[:CONTACTED_DOMAIN]->(d)\nMERGE (e)-[:REQUESTED_URL]->(url)\nMERGE (e)-[:INVOLVED_FILE]->(fh)\nMERGE (e)-[:USES_TECHNIQUE]->(t)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1424,
+        320
+      ],
+      "id": "4a3b98e2-eb68-456e-907f-73a00f224439",
+      "name": "Merge CSV data",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "=MERGE (ti:ThreatIntel {intel_id: '{{ $json.intel_id }}'})\nSET ti.source = '{{ $json.source }}',\n    ti.confidence = {{ $json.confidence }},\n    ti.first_seen = '{{ $json.first_seen }}',\n    ti.last_seen = '{{ $json.last_seen }}'\n\nMERGE (ioc:Domain {domain: '{{ $json.indicator_value }}'})\nMERGE (ti)-[:DESCRIBES]->(ioc)\n\nMERGE (a:ThreatActor {name: '{{ $json.threat_actor }}'})\nSET a.origin = '{{ $json.actor_origin }}',\n    a.motivation = '{{ $json.actor_motivation }}'\n\nMERGE (m:Malware {name: '{{ $json.malware }}'})\nSET m.malware_type = '{{ $json.malware_type }}'\n\nMERGE (c:Campaign {name: '{{ $json.campaign }}'})\nSET c.description = '{{ $json.campaign_description }}'\n\nMERGE (ti)-[:ATTRIBUTED_TO]->(a)\nMERGE (ti)-[:ASSOCIATED_WITH_MALWARE]->(m)\nMERGE (ti)-[:PART_OF_CAMPAIGN]->(c)\n\nMERGE (a)-[:USES_MALWARE]->(m)\nMERGE (a)-[:OPERATES_CAMPAIGN]->(c)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2896,
+        96
+      ],
+      "id": "1431151f-0d16-449d-9894-f4f3be3f0e30",
+      "name": "Merge JSON domain",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "=MERGE (ti:ThreatIntel {intel_id: '{{ $json.intel_id }}'})\nSET ti.source = '{{ $json.source }}',\n    ti.confidence = {{ $json.confidence }},\n    ti.first_seen = '{{ $json.first_seen }}',\n    ti.last_seen = '{{ $json.last_seen }}'\n\nMERGE (ioc:URL {url: '{{ $json.indicator_value }}'})\nMERGE (ti)-[:DESCRIBES]->(ioc)\n\nMERGE (a:ThreatActor {name: '{{ $json.threat_actor }}'})\nSET a.origin = '{{ $json.actor_origin }}',\n    a.motivation = '{{ $json.actor_motivation }}'\n\nMERGE (m:Malware {name: '{{ $json.malware }}'})\nSET m.malware_type = '{{ $json.malware_type }}'\n\nMERGE (c:Campaign {name: '{{ $json.campaign }}'})\nSET c.description = '{{ $json.campaign_description }}'\n\nMERGE (ti)-[:ATTRIBUTED_TO]->(a)\nMERGE (ti)-[:ASSOCIATED_WITH_MALWARE]->(m)\nMERGE (ti)-[:PART_OF_CAMPAIGN]->(c)\n\nMERGE (a)-[:USES_MALWARE]->(m)\nMERGE (a)-[:OPERATES_CAMPAIGN]->(c)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2896,
+        240
+      ],
+      "id": "827015b5-96db-44a8-8766-f21870079c2d",
+      "name": "Merge JSON URL",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "=MERGE (ti:ThreatIntel {intel_id: '{{ $json.intel_id }}'})\nSET ti.source = '{{ $json.source }}',\n    ti.confidence = {{ $json.confidence }},\n    ti.first_seen = '{{ $json.first_seen }}',\n    ti.last_seen = '{{ $json.last_seen }}'\n\nMERGE (ioc:IPAddress {ip: '{{ $json.indicator_value }}'})\nMERGE (ti)-[:DESCRIBES]->(ioc)\n\nMERGE (a:ThreatActor {name: '{{ $json.threat_actor }}'})\nSET a.origin = '{{ $json.actor_origin }}',\n    a.motivation = '{{ $json.actor_motivation }}'\n\nMERGE (m:Malware {name: '{{ $json.malware }}'})\nSET m.malware_type = '{{ $json.malware_type }}'\n\nMERGE (c:Campaign {name: '{{ $json.campaign }}'})\nSET c.description = '{{ $json.campaign_description }}'\n\nMERGE (ti)-[:ATTRIBUTED_TO]->(a)\nMERGE (ti)-[:ASSOCIATED_WITH_MALWARE]->(m)\nMERGE (ti)-[:PART_OF_CAMPAIGN]->(c)\n\nMERGE (a)-[:USES_MALWARE]->(m)\nMERGE (a)-[:OPERATES_CAMPAIGN]->(c)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2896,
+        384
+      ],
+      "id": "c2bcd8dd-3847-41e3-831c-2b4cf0d63862",
+      "name": "Merge JSON IP",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "=MERGE (ti:ThreatIntel {intel_id: '{{ $json.intel_id }}'})\nSET ti.source = '{{ $json.source }}',\n    ti.confidence = {{ $json.confidence }},\n    ti.first_seen = '{{ $json.first_seen }}',\n    ti.last_seen = '{{ $json.last_seen }}'\n\nMERGE (ioc:FileHash {hash: '{{ $json.indicator_value }}'})\nMERGE (ti)-[:DESCRIBES]->(ioc)\n\nMERGE (a:ThreatActor {name: '{{ $json.threat_actor }}'})\nSET a.origin = '{{ $json.actor_origin }}',\n    a.motivation = '{{ $json.actor_motivation }}'\n\nMERGE (m:Malware {name: '{{ $json.malware }}'})\nSET m.malware_type = '{{ $json.malware_type }}'\n\nMERGE (c:Campaign {name: '{{ $json.campaign }}'})\nSET c.description = '{{ $json.campaign_description }}'\n\nMERGE (ti)-[:ATTRIBUTED_TO]->(a)\nMERGE (ti)-[:ASSOCIATED_WITH_MALWARE]->(m)\nMERGE (ti)-[:PART_OF_CAMPAIGN]->(c)\n\nMERGE (a)-[:USES_MALWARE]->(m)\nMERGE (a)-[:OPERATES_CAMPAIGN]->(c)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2896,
+        528
+      ],
+      "id": "50e1f3a3-3a3d-4839-a9ee-a075eb01774c",
+      "name": "Merge JSON FileHash",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\n\nfor (const item of $input.all()) {\n  const x = item.json;\n\n  for (const t of x.techniques || []) {\n    output.push({\n      json: {\n        intel_id: x.intel_id,\n        malware: x.malware,\n        technique_id: String(t.technique_id || '').trim(),\n        technique_name: String(t.name || '').trim(),\n        tactic: String(t.tactic || '').trim()\n      }\n    });\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3216,
+        320
+      ],
+      "id": "daa97b83-43a1-462a-af6a-3b97a5fb915f",
+      "name": "Split Techniques"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "=MERGE (ti:ThreatIntel {intel_id: '{{ $json.intel_id }}'})\n\nMERGE (t:Technique {technique_id: '{{ $json.technique_id }}'})\nSET t.name = '{{ $json.technique_name }}',\n    t.tactic = '{{ $json.tactic }}'\n\nMERGE (ti)-[:REPORTS_TECHNIQUE]->(t)\n\nWITH ti, t\nMATCH (m:Malware {name: '{{ $json.malware }}'})\nMERGE (m)-[:USES_TECHNIQUE]->(t)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3408,
+        320
+      ],
+      "id": "1f3ecd6a-d70b-4c34-9d7e-59e8bc272e7f",
+      "name": "Merge JSON Technique",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "content": "## Integrate CSV data\n\n- CSV 파일을 읽어들여 파싱 및 정규화를 거친 후 Neo4j 에 통합하는 과정\n\nNodes Created\n• Event (event_id, timestamp, alert_type, severity)\n• Host (hostname)\n• User (user_id)\n• IPAddress (src_ip / dst_ip)\n• Domain (domain)\n• URL (url)\n• FileHash (hash)\n• Technique (technique_id)\n\nRelationships Created\n• Event -[:OCCURRED_ON]-> Host\n• Event -[:INITIATED_BY]-> User\n• Event -[:FROM_IP]-> Source IP\n• Event -[:TO_IP]-> Destination IP\n• Event -[:CONTACTED_DOMAIN]-> Domain\n• Event -[:REQUESTED_URL]-> URL\n• Event -[:INVOLVED_FILE]-> FileHash\n• Event -[:USES_TECHNIQUE]-> Technique",
+        "height": 832,
+        "width": 848,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        -128
+      ],
+      "id": "d2b0875e-89b6-43ae-b80f-939a4529037c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Integrate JSON data\n\n- CTI JSON 피드를 구조화된 threat graph로 통합\n- 외부 인텔리전스 정보를 내부 보안 이벤트(앞 플로우)와 통합하는 것이 목적\n\nNodes Created\n• ThreatIntel (intel_id, source, confidence, first_seen, last_seen)\n• Domain / URL / IPAddress / FileHash (IOC by indicator_type)\n• ThreatActor (name, origin, motivation)\n• Malware (name, malware_type)\n• Campaign (name, description)\n• Technique (technique_id, name, tactic)\n\nRelationships Created\n• ThreatIntel -[:DESCRIBES]-> IOC\n• ThreatIntel -[:ATTRIBUTED_TO]-> ThreatActor\n• ThreatIntel -[:ASSOCIATED_WITH_MALWARE]-> Malware\n• ThreatIntel -[:PART_OF_CAMPAIGN]-> Campaign\n• ThreatIntel -[:REPORTS_TECHNIQUE]-> Technique\n• ThreatActor -[:USES_MALWARE]-> Malware\n• ThreatActor -[:OPERATES_CAMPAIGN]-> Campaign\n• Malware -[:USES_TECHNIQUE]-> Technique",
+        "height": 832,
+        "width": 2000,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        -128
+      ],
+      "id": "c34553e2-ff87-49c7-ab62-713e092bf2c2",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read JSON File": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read CSV File": {
+      "main": [
+        [
+          {
+            "node": "Parse CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse CSV": {
+      "main": [
+        [
+          {
+            "node": "Normalize CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints1": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints2": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints3": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints4": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints5": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints6": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints7": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints8": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints9": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints10": {
+      "main": [
+        [
+          {
+            "node": "Setup Constraints11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Constraints11": {
+      "main": [
+        [
+          {
+            "node": "Read CSV File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize CSV": {
+      "main": [
+        [
+          {
+            "node": "Merge CSV data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON": {
+      "main": [
+        [
+          {
+            "node": "Split JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split JSON": {
+      "main": [
+        [
+          {
+            "node": "Normalize JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize JSON": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Merge JSON domain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge JSON URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge JSON IP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge JSON FileHash",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Techniques": {
+      "main": [
+        [
+          {
+            "node": "Merge JSON Technique",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge CSV data": {
+      "main": [
+        [
+          {
+            "node": "Read JSON File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge JSON domain": {
+      "main": [
+        [
+          {
+            "node": "Split Techniques",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge JSON URL": {
+      "main": [
+        [
+          {
+            "node": "Split Techniques",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge JSON IP": {
+      "main": [
+        [
+          {
+            "node": "Split Techniques",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge JSON FileHash": {
+      "main": [
+        [
+          {
+            "node": "Split Techniques",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bfc3397c-7c07-4158-8f4c-8aea21e495c3",
+  "meta": {
+    "instanceId": "35f9e4845be421ac9a8aca490c7c65ecdbde7a281ca2a97b43ca84b735e6214e"
+  },
+  "id": "Zs30M0YUmC045Mic",
+  "tags": []
+}

@@ -1,0 +1,1254 @@
+[
+  {
+    "intel_id": "TI-001",
+    "source": "OpenCTI Demo Feed",
+    "indicator_value": "evil-login-update.com",
+    "indicator_type": "domain",
+    "threat_actor": "Shadow Panda",
+    "actor_origin": "East Asia",
+    "actor_motivation": "Espionage",
+    "malware": "DarkLoader",
+    "malware_type": "Loader",
+    "campaign": "Operation NightFog",
+    "campaign_description": "Credential phishing and loader deployment against executives and HR teams.",
+    "confidence": 79,
+    "first_seen": "2026-04-02",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1566.002",
+        "name": "Spearphishing Link",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.001",
+        "name": "PowerShell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "tactic": "Command and Control"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-002",
+    "source": "OpenCTI Demo Feed",
+    "indicator_value": "m365-security-alerts.net",
+    "indicator_type": "domain",
+    "threat_actor": "Shadow Panda",
+    "actor_origin": "East Asia",
+    "actor_motivation": "Espionage",
+    "malware": "DarkLoader",
+    "malware_type": "Loader",
+    "campaign": "Operation NightFog",
+    "campaign_description": "Credential phishing and loader deployment against executives and HR teams.",
+    "confidence": 80,
+    "first_seen": "2026-04-03",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1566.002",
+        "name": "Spearphishing Link",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.001",
+        "name": "PowerShell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "tactic": "Command and Control"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-003",
+    "source": "OpenCTI Demo Feed",
+    "indicator_value": "research-collab-files.com",
+    "indicator_type": "domain",
+    "threat_actor": "Shadow Panda",
+    "actor_origin": "East Asia",
+    "actor_motivation": "Espionage",
+    "malware": "DarkLoader",
+    "malware_type": "Loader",
+    "campaign": "Operation NightFog",
+    "campaign_description": "Credential phishing and loader deployment against executives and HR teams.",
+    "confidence": 81,
+    "first_seen": "2026-04-04",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1566.002",
+        "name": "Spearphishing Link",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.001",
+        "name": "PowerShell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "tactic": "Command and Control"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-004",
+    "source": "URLhaus Demo Feed",
+    "indicator_value": "http://evil-login-update.com/update.exe",
+    "indicator_type": "url",
+    "threat_actor": "Shadow Panda",
+    "actor_origin": "East Asia",
+    "actor_motivation": "Espionage",
+    "malware": "DarkLoader",
+    "malware_type": "Loader",
+    "campaign": "Operation NightFog",
+    "campaign_description": "Credential phishing and loader deployment against executives and HR teams.",
+    "confidence": 82,
+    "first_seen": "2026-04-05",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1566.002",
+        "name": "Spearphishing Link",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.001",
+        "name": "PowerShell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "tactic": "Command and Control"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-005",
+    "source": "URLhaus Demo Feed",
+    "indicator_value": "http://m365-security-alerts.net/login/verify",
+    "indicator_type": "url",
+    "threat_actor": "Shadow Panda",
+    "actor_origin": "East Asia",
+    "actor_motivation": "Espionage",
+    "malware": "DarkLoader",
+    "malware_type": "Loader",
+    "campaign": "Operation NightFog",
+    "campaign_description": "Credential phishing and loader deployment against executives and HR teams.",
+    "confidence": 83,
+    "first_seen": "2026-04-06",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1566.002",
+        "name": "Spearphishing Link",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.001",
+        "name": "PowerShell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "tactic": "Command and Control"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-006",
+    "source": "URLhaus Demo Feed",
+    "indicator_value": "https://research-collab-files.com/share/invite",
+    "indicator_type": "url",
+    "threat_actor": "Shadow Panda",
+    "actor_origin": "East Asia",
+    "actor_motivation": "Espionage",
+    "malware": "DarkLoader",
+    "malware_type": "Loader",
+    "campaign": "Operation NightFog",
+    "campaign_description": "Credential phishing and loader deployment against executives and HR teams.",
+    "confidence": 84,
+    "first_seen": "2026-04-07",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1566.002",
+        "name": "Spearphishing Link",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.001",
+        "name": "PowerShell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "tactic": "Command and Control"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-007",
+    "source": "C2 Tracker Demo",
+    "indicator_value": "185.199.110.153",
+    "indicator_type": "ip",
+    "threat_actor": "Shadow Panda",
+    "actor_origin": "East Asia",
+    "actor_motivation": "Espionage",
+    "malware": "DarkLoader",
+    "malware_type": "Loader",
+    "campaign": "Operation NightFog",
+    "campaign_description": "Credential phishing and loader deployment against executives and HR teams.",
+    "confidence": 85,
+    "first_seen": "2026-04-08",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1566.002",
+        "name": "Spearphishing Link",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.001",
+        "name": "PowerShell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "tactic": "Command and Control"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-008",
+    "source": "C2 Tracker Demo",
+    "indicator_value": "198.51.100.24",
+    "indicator_type": "ip",
+    "threat_actor": "Shadow Panda",
+    "actor_origin": "East Asia",
+    "actor_motivation": "Espionage",
+    "malware": "DarkLoader",
+    "malware_type": "Loader",
+    "campaign": "Operation NightFog",
+    "campaign_description": "Credential phishing and loader deployment against executives and HR teams.",
+    "confidence": 86,
+    "first_seen": "2026-04-09",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1566.002",
+        "name": "Spearphishing Link",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.001",
+        "name": "PowerShell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "tactic": "Command and Control"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-009",
+    "source": "MalwareBazaar Demo",
+    "indicator_value": "9f2c8a7b4d1e3f6a8b0c2d4e6f8a1b3c5d7e9f00112233445566778899aabbcc",
+    "indicator_type": "file_hash",
+    "threat_actor": "Shadow Panda",
+    "actor_origin": "East Asia",
+    "actor_motivation": "Espionage",
+    "malware": "DarkLoader",
+    "malware_type": "Loader",
+    "campaign": "Operation NightFog",
+    "campaign_description": "Credential phishing and loader deployment against executives and HR teams.",
+    "confidence": 87,
+    "first_seen": "2026-04-10",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1566.002",
+        "name": "Spearphishing Link",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.001",
+        "name": "PowerShell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "tactic": "Command and Control"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-010",
+    "source": "MalwareBazaar Demo",
+    "indicator_value": "7a1d4c9e2f3b5a8c0d6e1f2a9b4c7d8e0f11223344556677889900aabbccddee",
+    "indicator_type": "file_hash",
+    "threat_actor": "Shadow Panda",
+    "actor_origin": "East Asia",
+    "actor_motivation": "Espionage",
+    "malware": "DarkLoader",
+    "malware_type": "Loader",
+    "campaign": "Operation NightFog",
+    "campaign_description": "Credential phishing and loader deployment against executives and HR teams.",
+    "confidence": 88,
+    "first_seen": "2026-04-11",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1566.002",
+        "name": "Spearphishing Link",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.001",
+        "name": "PowerShell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1105",
+        "name": "Ingress Tool Transfer",
+        "tactic": "Command and Control"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-011",
+    "source": "OpenCTI Demo Feed",
+    "indicator_value": "secure-docs-share.net",
+    "indicator_type": "domain",
+    "threat_actor": "Crimson Lynx",
+    "actor_origin": "Eastern Europe",
+    "actor_motivation": "Financial Gain",
+    "malware": "DocDropper",
+    "malware_type": "Dropper",
+    "campaign": "Invoice Storm",
+    "campaign_description": "Finance-themed phishing using malicious Office documents.",
+    "confidence": 89,
+    "first_seen": "2026-04-12",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1204.002",
+        "name": "Malicious File",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1059.005",
+        "name": "Visual Basic",
+        "tactic": "Execution"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-012",
+    "source": "OpenCTI Demo Feed",
+    "indicator_value": "tax-form-review.info",
+    "indicator_type": "domain",
+    "threat_actor": "Crimson Lynx",
+    "actor_origin": "Eastern Europe",
+    "actor_motivation": "Financial Gain",
+    "malware": "DocDropper",
+    "malware_type": "Dropper",
+    "campaign": "Invoice Storm",
+    "campaign_description": "Finance-themed phishing using malicious Office documents.",
+    "confidence": 90,
+    "first_seen": "2026-04-13",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1204.002",
+        "name": "Malicious File",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1059.005",
+        "name": "Visual Basic",
+        "tactic": "Execution"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-013",
+    "source": "URLhaus Demo Feed",
+    "indicator_value": "https://secure-docs-share.net/invoice/april.docm",
+    "indicator_type": "url",
+    "threat_actor": "Crimson Lynx",
+    "actor_origin": "Eastern Europe",
+    "actor_motivation": "Financial Gain",
+    "malware": "DocDropper",
+    "malware_type": "Dropper",
+    "campaign": "Invoice Storm",
+    "campaign_description": "Finance-themed phishing using malicious Office documents.",
+    "confidence": 91,
+    "first_seen": "2026-04-14",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1204.002",
+        "name": "Malicious File",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1059.005",
+        "name": "Visual Basic",
+        "tactic": "Execution"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-014",
+    "source": "URLhaus Demo Feed",
+    "indicator_value": "http://tax-form-review.info/forms/2026.xlsm",
+    "indicator_type": "url",
+    "threat_actor": "Crimson Lynx",
+    "actor_origin": "Eastern Europe",
+    "actor_motivation": "Financial Gain",
+    "malware": "DocDropper",
+    "malware_type": "Dropper",
+    "campaign": "Invoice Storm",
+    "campaign_description": "Finance-themed phishing using malicious Office documents.",
+    "confidence": 92,
+    "first_seen": "2026-04-15",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1204.002",
+        "name": "Malicious File",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1059.005",
+        "name": "Visual Basic",
+        "tactic": "Execution"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-015",
+    "source": "C2 Tracker Demo",
+    "indicator_value": "203.0.113.45",
+    "indicator_type": "ip",
+    "threat_actor": "Crimson Lynx",
+    "actor_origin": "Eastern Europe",
+    "actor_motivation": "Financial Gain",
+    "malware": "DocDropper",
+    "malware_type": "Dropper",
+    "campaign": "Invoice Storm",
+    "campaign_description": "Finance-themed phishing using malicious Office documents.",
+    "confidence": 93,
+    "first_seen": "2026-04-16",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1204.002",
+        "name": "Malicious File",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1059.005",
+        "name": "Visual Basic",
+        "tactic": "Execution"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-016",
+    "source": "MalwareBazaar Demo",
+    "indicator_value": "0a1b2c3d4e5f67890123456789abcdef0a1b2c3d4e5f67890123456789abcdef",
+    "indicator_type": "file_hash",
+    "threat_actor": "Crimson Lynx",
+    "actor_origin": "Eastern Europe",
+    "actor_motivation": "Financial Gain",
+    "malware": "DocDropper",
+    "malware_type": "Dropper",
+    "campaign": "Invoice Storm",
+    "campaign_description": "Finance-themed phishing using malicious Office documents.",
+    "confidence": 94,
+    "first_seen": "2026-04-17",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1204.002",
+        "name": "Malicious File",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1059.005",
+        "name": "Visual Basic",
+        "tactic": "Execution"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-017",
+    "source": "MalwareBazaar Demo",
+    "indicator_value": "f1e2d3c4b5a697887766554433221100ffeeddccbbaa99887766554433221100",
+    "indicator_type": "file_hash",
+    "threat_actor": "Crimson Lynx",
+    "actor_origin": "Eastern Europe",
+    "actor_motivation": "Financial Gain",
+    "malware": "DocDropper",
+    "malware_type": "Dropper",
+    "campaign": "Invoice Storm",
+    "campaign_description": "Finance-themed phishing using malicious Office documents.",
+    "confidence": 95,
+    "first_seen": "2026-04-18",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1204.002",
+        "name": "Malicious File",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1059.005",
+        "name": "Visual Basic",
+        "tactic": "Execution"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-018",
+    "source": "OpenCTI Demo Feed",
+    "indicator_value": "cdn-driver-sync.org",
+    "indicator_type": "domain",
+    "threat_actor": "Iron Jackal",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "RundllBot",
+    "malware_type": "Backdoor",
+    "campaign": "Driver Mirage",
+    "campaign_description": "Fake driver update infrastructure used for DLL side-loading and C2.",
+    "confidence": 78,
+    "first_seen": "2026-04-01",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1218.011",
+        "name": "Rundll32",
+        "tactic": "Defense Evasion"
+      },
+      {
+        "technique_id": "T1071.001",
+        "name": "Web Protocols",
+        "tactic": "Command and Control"
+      },
+      {
+        "technique_id": "T1053.005",
+        "name": "Scheduled Task",
+        "tactic": "Persistence"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-019",
+    "source": "OpenCTI Demo Feed",
+    "indicator_value": "update-cdn-check.net",
+    "indicator_type": "domain",
+    "threat_actor": "Iron Jackal",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "RundllBot",
+    "malware_type": "Backdoor",
+    "campaign": "Driver Mirage",
+    "campaign_description": "Fake driver update infrastructure used for DLL side-loading and C2.",
+    "confidence": 79,
+    "first_seen": "2026-04-02",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1218.011",
+        "name": "Rundll32",
+        "tactic": "Defense Evasion"
+      },
+      {
+        "technique_id": "T1071.001",
+        "name": "Web Protocols",
+        "tactic": "Command and Control"
+      },
+      {
+        "technique_id": "T1053.005",
+        "name": "Scheduled Task",
+        "tactic": "Persistence"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-020",
+    "source": "URLhaus Demo Feed",
+    "indicator_value": "http://cdn-driver-sync.org/drivers/video.dll",
+    "indicator_type": "url",
+    "threat_actor": "Iron Jackal",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "RundllBot",
+    "malware_type": "Backdoor",
+    "campaign": "Driver Mirage",
+    "campaign_description": "Fake driver update infrastructure used for DLL side-loading and C2.",
+    "confidence": 80,
+    "first_seen": "2026-04-03",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1218.011",
+        "name": "Rundll32",
+        "tactic": "Defense Evasion"
+      },
+      {
+        "technique_id": "T1071.001",
+        "name": "Web Protocols",
+        "tactic": "Command and Control"
+      },
+      {
+        "technique_id": "T1053.005",
+        "name": "Scheduled Task",
+        "tactic": "Persistence"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-021",
+    "source": "URLhaus Demo Feed",
+    "indicator_value": "https://update-cdn-check.net/checkin/payload.bin",
+    "indicator_type": "url",
+    "threat_actor": "Iron Jackal",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "RundllBot",
+    "malware_type": "Backdoor",
+    "campaign": "Driver Mirage",
+    "campaign_description": "Fake driver update infrastructure used for DLL side-loading and C2.",
+    "confidence": 81,
+    "first_seen": "2026-04-04",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1218.011",
+        "name": "Rundll32",
+        "tactic": "Defense Evasion"
+      },
+      {
+        "technique_id": "T1071.001",
+        "name": "Web Protocols",
+        "tactic": "Command and Control"
+      },
+      {
+        "technique_id": "T1053.005",
+        "name": "Scheduled Task",
+        "tactic": "Persistence"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-022",
+    "source": "C2 Tracker Demo",
+    "indicator_value": "91.219.236.166",
+    "indicator_type": "ip",
+    "threat_actor": "Iron Jackal",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "RundllBot",
+    "malware_type": "Backdoor",
+    "campaign": "Driver Mirage",
+    "campaign_description": "Fake driver update infrastructure used for DLL side-loading and C2.",
+    "confidence": 82,
+    "first_seen": "2026-04-05",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1218.011",
+        "name": "Rundll32",
+        "tactic": "Defense Evasion"
+      },
+      {
+        "technique_id": "T1071.001",
+        "name": "Web Protocols",
+        "tactic": "Command and Control"
+      },
+      {
+        "technique_id": "T1053.005",
+        "name": "Scheduled Task",
+        "tactic": "Persistence"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-023",
+    "source": "C2 Tracker Demo",
+    "indicator_value": "192.0.2.77",
+    "indicator_type": "ip",
+    "threat_actor": "Iron Jackal",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "RundllBot",
+    "malware_type": "Backdoor",
+    "campaign": "Driver Mirage",
+    "campaign_description": "Fake driver update infrastructure used for DLL side-loading and C2.",
+    "confidence": 83,
+    "first_seen": "2026-04-06",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1218.011",
+        "name": "Rundll32",
+        "tactic": "Defense Evasion"
+      },
+      {
+        "technique_id": "T1071.001",
+        "name": "Web Protocols",
+        "tactic": "Command and Control"
+      },
+      {
+        "technique_id": "T1053.005",
+        "name": "Scheduled Task",
+        "tactic": "Persistence"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-024",
+    "source": "MalwareBazaar Demo",
+    "indicator_value": "b4f6a8c0e2d4f6a8b0c1d3e5f7091a2b3c4d5e6f708192a3b4c5d6e7f8091a2",
+    "indicator_type": "file_hash",
+    "threat_actor": "Iron Jackal",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "RundllBot",
+    "malware_type": "Backdoor",
+    "campaign": "Driver Mirage",
+    "campaign_description": "Fake driver update infrastructure used for DLL side-loading and C2.",
+    "confidence": 84,
+    "first_seen": "2026-04-07",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1218.011",
+        "name": "Rundll32",
+        "tactic": "Defense Evasion"
+      },
+      {
+        "technique_id": "T1071.001",
+        "name": "Web Protocols",
+        "tactic": "Command and Control"
+      },
+      {
+        "technique_id": "T1053.005",
+        "name": "Scheduled Task",
+        "tactic": "Persistence"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-025",
+    "source": "MalwareBazaar Demo",
+    "indicator_value": "d12f4a9c8b7e6d5c4b3a29180716253445566778899aabbccddeeff0011223344",
+    "indicator_type": "file_hash",
+    "threat_actor": "Iron Jackal",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "RundllBot",
+    "malware_type": "Backdoor",
+    "campaign": "Driver Mirage",
+    "campaign_description": "Fake driver update infrastructure used for DLL side-loading and C2.",
+    "confidence": 85,
+    "first_seen": "2026-04-08",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1218.011",
+        "name": "Rundll32",
+        "tactic": "Defense Evasion"
+      },
+      {
+        "technique_id": "T1071.001",
+        "name": "Web Protocols",
+        "tactic": "Command and Control"
+      },
+      {
+        "technique_id": "T1053.005",
+        "name": "Scheduled Task",
+        "tactic": "Persistence"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-026",
+    "source": "OpenCTI Demo Feed",
+    "indicator_value": "exfil-storage-cloud.com",
+    "indicator_type": "domain",
+    "threat_actor": "Blue Otter",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "CloudSiphon",
+    "malware_type": "Exfiltration Tool",
+    "campaign": "Quiet Bucket",
+    "campaign_description": "Use of cloud-like domains for staged archive exfiltration.",
+    "confidence": 86,
+    "first_seen": "2026-04-09",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1560.001",
+        "name": "Archive via Utility",
+        "tactic": "Collection"
+      },
+      {
+        "technique_id": "T1041",
+        "name": "Exfiltration Over C2 Channel",
+        "tactic": "Exfiltration"
+      },
+      {
+        "technique_id": "T1114.003",
+        "name": "Email Forwarding Rule",
+        "tactic": "Collection"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-027",
+    "source": "OpenCTI Demo Feed",
+    "indicator_value": "mx-relay-health.net",
+    "indicator_type": "domain",
+    "threat_actor": "Blue Otter",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "CloudSiphon",
+    "malware_type": "Exfiltration Tool",
+    "campaign": "Quiet Bucket",
+    "campaign_description": "Use of cloud-like domains for staged archive exfiltration.",
+    "confidence": 87,
+    "first_seen": "2026-04-10",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1560.001",
+        "name": "Archive via Utility",
+        "tactic": "Collection"
+      },
+      {
+        "technique_id": "T1041",
+        "name": "Exfiltration Over C2 Channel",
+        "tactic": "Exfiltration"
+      },
+      {
+        "technique_id": "T1114.003",
+        "name": "Email Forwarding Rule",
+        "tactic": "Collection"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-028",
+    "source": "URLhaus Demo Feed",
+    "indicator_value": "https://exfil-storage-cloud.com/upload/session",
+    "indicator_type": "url",
+    "threat_actor": "Blue Otter",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "CloudSiphon",
+    "malware_type": "Exfiltration Tool",
+    "campaign": "Quiet Bucket",
+    "campaign_description": "Use of cloud-like domains for staged archive exfiltration.",
+    "confidence": 88,
+    "first_seen": "2026-04-11",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1560.001",
+        "name": "Archive via Utility",
+        "tactic": "Collection"
+      },
+      {
+        "technique_id": "T1041",
+        "name": "Exfiltration Over C2 Channel",
+        "tactic": "Exfiltration"
+      },
+      {
+        "technique_id": "T1114.003",
+        "name": "Email Forwarding Rule",
+        "tactic": "Collection"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-029",
+    "source": "URLhaus Demo Feed",
+    "indicator_value": "https://mx-relay-health.net/rules/sync",
+    "indicator_type": "url",
+    "threat_actor": "Blue Otter",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "CloudSiphon",
+    "malware_type": "Exfiltration Tool",
+    "campaign": "Quiet Bucket",
+    "campaign_description": "Use of cloud-like domains for staged archive exfiltration.",
+    "confidence": 89,
+    "first_seen": "2026-04-12",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1560.001",
+        "name": "Archive via Utility",
+        "tactic": "Collection"
+      },
+      {
+        "technique_id": "T1041",
+        "name": "Exfiltration Over C2 Channel",
+        "tactic": "Exfiltration"
+      },
+      {
+        "technique_id": "T1114.003",
+        "name": "Email Forwarding Rule",
+        "tactic": "Collection"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-030",
+    "source": "C2 Tracker Demo",
+    "indicator_value": "203.0.113.88",
+    "indicator_type": "ip",
+    "threat_actor": "Blue Otter",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "CloudSiphon",
+    "malware_type": "Exfiltration Tool",
+    "campaign": "Quiet Bucket",
+    "campaign_description": "Use of cloud-like domains for staged archive exfiltration.",
+    "confidence": 90,
+    "first_seen": "2026-04-13",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1560.001",
+        "name": "Archive via Utility",
+        "tactic": "Collection"
+      },
+      {
+        "technique_id": "T1041",
+        "name": "Exfiltration Over C2 Channel",
+        "tactic": "Exfiltration"
+      },
+      {
+        "technique_id": "T1114.003",
+        "name": "Email Forwarding Rule",
+        "tactic": "Collection"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-031",
+    "source": "MalwareBazaar Demo",
+    "indicator_value": "aa11bb22cc33dd44ee55ff6677889900aa11bb22cc33dd44ee55ff6677889900",
+    "indicator_type": "file_hash",
+    "threat_actor": "Blue Otter",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "CloudSiphon",
+    "malware_type": "Exfiltration Tool",
+    "campaign": "Quiet Bucket",
+    "campaign_description": "Use of cloud-like domains for staged archive exfiltration.",
+    "confidence": 91,
+    "first_seen": "2026-04-14",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1560.001",
+        "name": "Archive via Utility",
+        "tactic": "Collection"
+      },
+      {
+        "technique_id": "T1041",
+        "name": "Exfiltration Over C2 Channel",
+        "tactic": "Exfiltration"
+      },
+      {
+        "technique_id": "T1114.003",
+        "name": "Email Forwarding Rule",
+        "tactic": "Collection"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-032",
+    "source": "MalwareBazaar Demo",
+    "indicator_value": "c0ffee1234567890abcdeffedcba09876543211234567890abcdefabcdef1234",
+    "indicator_type": "file_hash",
+    "threat_actor": "Blue Otter",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Data Theft",
+    "malware": "CloudSiphon",
+    "malware_type": "Exfiltration Tool",
+    "campaign": "Quiet Bucket",
+    "campaign_description": "Use of cloud-like domains for staged archive exfiltration.",
+    "confidence": 92,
+    "first_seen": "2026-04-15",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1560.001",
+        "name": "Archive via Utility",
+        "tactic": "Collection"
+      },
+      {
+        "technique_id": "T1041",
+        "name": "Exfiltration Over C2 Channel",
+        "tactic": "Exfiltration"
+      },
+      {
+        "technique_id": "T1114.003",
+        "name": "Email Forwarding Rule",
+        "tactic": "Collection"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-033",
+    "source": "OpenCTI Demo Feed",
+    "indicator_value": "repo-cache-update.io",
+    "indicator_type": "domain",
+    "threat_actor": "Amber Mantis",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Supply Chain Compromise",
+    "malware": "PkgRider",
+    "malware_type": "Downloader",
+    "campaign": "BuildHook",
+    "campaign_description": "Developer and build server targeting through fake package mirrors.",
+    "confidence": 93,
+    "first_seen": "2026-04-16",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1195.002",
+        "name": "Compromise Software Supply Chain",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.004",
+        "name": "Unix Shell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1218.007",
+        "name": "Msiexec",
+        "tactic": "Defense Evasion"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-034",
+    "source": "OpenCTI Demo Feed",
+    "indicator_value": "software-license-portal.org",
+    "indicator_type": "domain",
+    "threat_actor": "Amber Mantis",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Supply Chain Compromise",
+    "malware": "PkgRider",
+    "malware_type": "Downloader",
+    "campaign": "BuildHook",
+    "campaign_description": "Developer and build server targeting through fake package mirrors.",
+    "confidence": 94,
+    "first_seen": "2026-04-17",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1195.002",
+        "name": "Compromise Software Supply Chain",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.004",
+        "name": "Unix Shell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1218.007",
+        "name": "Msiexec",
+        "tactic": "Defense Evasion"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-035",
+    "source": "URLhaus Demo Feed",
+    "indicator_value": "https://repo-cache-update.io/npm/pkg.tgz",
+    "indicator_type": "url",
+    "threat_actor": "Amber Mantis",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Supply Chain Compromise",
+    "malware": "PkgRider",
+    "malware_type": "Downloader",
+    "campaign": "BuildHook",
+    "campaign_description": "Developer and build server targeting through fake package mirrors.",
+    "confidence": 95,
+    "first_seen": "2026-04-18",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1195.002",
+        "name": "Compromise Software Supply Chain",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.004",
+        "name": "Unix Shell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1218.007",
+        "name": "Msiexec",
+        "tactic": "Defense Evasion"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-036",
+    "source": "URLhaus Demo Feed",
+    "indicator_value": "https://software-license-portal.org/download/setup.msi",
+    "indicator_type": "url",
+    "threat_actor": "Amber Mantis",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Supply Chain Compromise",
+    "malware": "PkgRider",
+    "malware_type": "Downloader",
+    "campaign": "BuildHook",
+    "campaign_description": "Developer and build server targeting through fake package mirrors.",
+    "confidence": 78,
+    "first_seen": "2026-04-01",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1195.002",
+        "name": "Compromise Software Supply Chain",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.004",
+        "name": "Unix Shell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1218.007",
+        "name": "Msiexec",
+        "tactic": "Defense Evasion"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-037",
+    "source": "C2 Tracker Demo",
+    "indicator_value": "198.51.100.66",
+    "indicator_type": "ip",
+    "threat_actor": "Amber Mantis",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Supply Chain Compromise",
+    "malware": "PkgRider",
+    "malware_type": "Downloader",
+    "campaign": "BuildHook",
+    "campaign_description": "Developer and build server targeting through fake package mirrors.",
+    "confidence": 79,
+    "first_seen": "2026-04-02",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1195.002",
+        "name": "Compromise Software Supply Chain",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.004",
+        "name": "Unix Shell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1218.007",
+        "name": "Msiexec",
+        "tactic": "Defense Evasion"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-038",
+    "source": "MalwareBazaar Demo",
+    "indicator_value": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+    "indicator_type": "file_hash",
+    "threat_actor": "Amber Mantis",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Supply Chain Compromise",
+    "malware": "PkgRider",
+    "malware_type": "Downloader",
+    "campaign": "BuildHook",
+    "campaign_description": "Developer and build server targeting through fake package mirrors.",
+    "confidence": 80,
+    "first_seen": "2026-04-03",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1195.002",
+        "name": "Compromise Software Supply Chain",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.004",
+        "name": "Unix Shell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1218.007",
+        "name": "Msiexec",
+        "tactic": "Defense Evasion"
+      }
+    ]
+  },
+  {
+    "intel_id": "TI-039",
+    "source": "MalwareBazaar Demo",
+    "indicator_value": "abcdefabcdef1234567890abcdefabcdef1234567890abcdefabcdef12345678",
+    "indicator_type": "file_hash",
+    "threat_actor": "Amber Mantis",
+    "actor_origin": "Unknown",
+    "actor_motivation": "Supply Chain Compromise",
+    "malware": "PkgRider",
+    "malware_type": "Downloader",
+    "campaign": "BuildHook",
+    "campaign_description": "Developer and build server targeting through fake package mirrors.",
+    "confidence": 81,
+    "first_seen": "2026-04-04",
+    "last_seen": "2026-04-24",
+    "techniques": [
+      {
+        "technique_id": "T1195.002",
+        "name": "Compromise Software Supply Chain",
+        "tactic": "Initial Access"
+      },
+      {
+        "technique_id": "T1059.004",
+        "name": "Unix Shell",
+        "tactic": "Execution"
+      },
+      {
+        "technique_id": "T1218.007",
+        "name": "Msiexec",
+        "tactic": "Defense Evasion"
+      }
+    ]
+  }
+]

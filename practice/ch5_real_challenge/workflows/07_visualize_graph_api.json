@@ -1,0 +1,231 @@
+{
+  "name": "07 Visualize Graph API",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "graph-viewer-api",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        0
+      ],
+      "id": "c248fb94-a042-49ee-a1b2-1474906f10d3",
+      "name": "Webhook",
+      "webhookId": "graph-viewer-api-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $('Webhook').item.json.body || {};\nconst normalizeArray = (value) => {\n  if (Array.isArray(value)) return value.filter(Boolean).map((v) => String(v));\n  if (typeof value === 'string' && value.trim()) return value.split(',').map((v) => v.trim()).filter(Boolean);\n  return [];\n};\nreturn [{ json: { action: String(body.action || 'incidents'), incidentId: String(body.incidentId || ''), nodeId: String(body.nodeId || ''), targetLabels: normalizeArray(body.targetLabels), existingNodeIds: normalizeArray(body.existingNodeIds) } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        0
+      ],
+      "id": "658d4bc6-f145-49ca-a2d5-7bfcf2fd5704",
+      "name": "Parse Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = (s) => String(s || '').replace(/\\\\/g, '\\\\\\\\').replace(/'/g, \"\\\\'\");\nconst quoteList = (values) => `[${values.map((v) => `'${esc(v)}'`).join(',')}]`;\nconst action = $json.action;\nconst incidentId = esc($json.incidentId);\nconst nodeId = esc($json.nodeId);\nconst targets = quoteList($json.targetLabels || []);\nconst existing = quoteList($json.existingNodeIds || []);\nlet query = '';\nif (action === 'incidents') {\n  query = `MATCH (inc:Incident)\nRETURN inc.incident_id AS incident_id,\n       elementId(inc) AS element_id,\n       coalesce(inc.title, inc.incident_id) AS title,\n       inc.timestamp AS timestamp,\n       inc.summary AS summary\nORDER BY inc.timestamp DESC\nLIMIT 100`;\n} else if (action === 'incident_graph') {\n  query = `CALL {\n  MATCH (inc:Incident {incident_id:'${incidentId}'})\n  RETURN [{id: elementId(inc), labels: labels(inc), props: properties(inc)}] AS path_nodes,\n         [] AS path_rels\n  UNION ALL\n  MATCH (inc:Incident {incident_id:'${incidentId}'})\n  MATCH p = (inc)-[*1..2]-(n)\n  WHERE NOT n:Incident OR elementId(n) = elementId(inc)\n  RETURN [node IN nodes(p) | {id: elementId(node), labels: labels(node), props: properties(node)}] AS path_nodes,\n         [rel IN relationships(p) | {source: elementId(startNode(rel)), target: elementId(endNode(rel)), type: type(rel), props: properties(rel)}] AS path_rels\n}\nRETURN path_nodes, path_rels\nLIMIT 400`;\n} else if (action === 'node_details') {\n  query = `MATCH (n)\nWHERE elementId(n) = '${nodeId}'\nOPTIONAL MATCH (n)--(m)\nWITH n, collect(DISTINCT {id: elementId(m), label: coalesce(m.title, m.name, m.org_name, m.technique_id, m.cve_id, m.value, m.ip, m.domain, m.mitigation_id, m.tactic_id), labels: labels(m)})[0..12] AS neighbors\nRETURN elementId(n) AS id, labels(n) AS labels, properties(n) AS props, neighbors`;\n} else if (action === 'neighbor_counts') {\n  query = `WITH ${existing} AS existingIds\nMATCH (n)\nWHERE elementId(n) = '${nodeId}'\nOPTIONAL MATCH (n)--(m)\nWHERE elementId(m) <> '${nodeId}'\n  AND NOT elementId(m) IN existingIds\nWITH head([l IN labels(m) WHERE NOT l IN ['Base', 'UcoObject']]) AS label\nWHERE label IS NOT NULL\nRETURN label, count(*) AS count\nORDER BY count DESC, label ASC`;\n} else if (action === 'expand_node') {\n  query = `WITH ${targets} AS targetLabels, ${existing} AS existingIds\nMATCH (n)\nWHERE elementId(n) = '${nodeId}'\nOPTIONAL MATCH (n)-[r]-(m)\nWHERE elementId(m) <> '${nodeId}'\n  AND (size(targetLabels) = 0 OR any(l IN labels(m) WHERE l IN targetLabels))\n  AND NOT elementId(m) IN existingIds\n  AND coalesce(m.title, m.name, m.org_name, m.technique_id, m.cve_id, m.value, m.ip, m.domain, m.mitigation_id, m.tactic_id) IS NOT NULL\nRETURN elementId(n) AS source_id, elementId(m) AS node_id, labels(m) AS node_labels, properties(m) AS node_props, type(r) AS rel_type, properties(r) AS rel_props\nLIMIT 120`;\n} else {\n  query = `RETURN 'unsupported_action' AS error, '${esc(action)}' AS action`;\n}\nreturn [{ json: { ...$json, query } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        60,
+        0
+      ],
+      "id": "68784429-f266-442e-824f-fe92ed9ab001",
+      "name": "Build Query"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/read-cypher",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: $json.query }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        300,
+        0
+      ],
+      "id": "f90d728b-cd3e-46b5-b0cb-cf4f1c7e150d",
+      "name": "Read Graph Data",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        540,
+        0
+      ],
+      "id": "dba56402-55be-46c7-9176-f426cd467954",
+      "name": "Merge Request and Result"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        760,
+        0
+      ],
+      "id": "32e17f3b-f947-4051-a893-266eef9ebddb",
+      "name": "Aggregate Context"
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = Array.isArray($json.data) ? $json.data : [];\nconst request = all[0] || {};\nconst resultItems = all.slice(1);\n\nconst flattenRows = (items) => {\n  const rows = [];\n  for (const item of items) {\n    if (!item || typeof item !== 'object') continue;\n    if (Array.isArray(item)) {\n      rows.push(...item);\n      continue;\n    }\n    if (Array.isArray(item.data)) {\n      rows.push(...item.data);\n      continue;\n    }\n    if (Array.isArray(item.results)) {\n      rows.push(...item.results);\n      continue;\n    }\n    if (Array.isArray(item.records)) {\n      rows.push(...item.records);\n      continue;\n    }\n    if (Array.isArray(item.rows)) {\n      rows.push(...item.rows);\n      continue;\n    }\n    rows.push(item);\n  }\n  return rows;\n};\n\nconst rows = flattenRows(resultItems);\nconst pickLabel = (labels = []) => ['Incident', 'ThreatActor', 'Victim', 'Technique', 'Malware', 'Vulnerability', 'Indicator', 'IPAddress', 'Domain', 'Tool', 'Tactic', 'Mitigation'].find((label) => labels.includes(label)) || labels[0] || 'Unknown';\nconst pickName = (props = {}, fallback = '') => props.title || props.name || props.org_name || props.technique_id || props.cve_id || props.value || props.ip || props.domain || props.mitigation_id || props.tactic_id || fallback;\nconst relLabel = (rel) => rel?.props?.relationshipType || rel?.type || 'RELATED_TO';\nlet payload = { action: request.action, ok: true, rowCount: rows.length };\nif (request.action === 'incidents') {\n  payload.incidents = rows.filter((row) => row.incident_id).map((row) => ({ incidentId: row.incident_id, elementId: row.element_id, title: row.title, timestamp: row.timestamp, summary: row.summary || '' }));\n} else if (request.action === 'incident_graph') {\n  const nodes = new Map();\n  const links = new Map();\n  for (const row of rows) {\n    for (const node of (row.path_nodes || [])) {\n      if (!node?.id) continue;\n      nodes.set(node.id, { id: node.id, label: pickLabel(node.labels || []), name: pickName(node.props || {}, node.id), properties: node.props || {} });\n    }\n    for (const rel of (row.path_rels || [])) {\n      if (!rel?.source || !rel?.target) continue;\n      const key = [rel.source, rel.target, relLabel(rel)].sort().join('|');\n      if (!links.has(key)) links.set(key, { source: rel.source, target: rel.target, label: relLabel(rel) });\n    }\n  }\n  payload.graph = { nodes: [...nodes.values()], links: [...links.values()] };\n} else if (request.action === 'node_details') {\n  const row = rows[0] || null;\n  payload.node = row ? { id: row.id, label: pickLabel(row.labels || []), name: pickName(row.props || {}, row.id), properties: row.props || {}, neighbors: (row.neighbors || []).filter((neighbor) => neighbor?.id) } : null;\n} else if (request.action === 'neighbor_counts') {\n  payload.neighborCounts = rows.filter((row) => row.label).map((row) => ({ label: row.label, count: Number(row.count || 0) }));\n} else if (request.action === 'expand_node') {\n  const nodes = new Map();\n  const links = [];\n  for (const row of rows) {\n    if (!row.node_id) continue;\n    nodes.set(row.node_id, { id: row.node_id, label: pickLabel(row.node_labels || []), name: pickName(row.node_props || {}, row.node_id), properties: row.node_props || {} });\n    links.push({ source: row.source_id, target: row.node_id, label: row.rel_props?.relationshipType || row.rel_type || 'RELATED_TO' });\n  }\n  payload.expansion = { nodes: [...nodes.values()], links };\n} else {\n  payload = { action: request.action, ok: false, error: 'Unsupported action', supportedActions: ['incidents', 'incident_graph', 'node_details', 'neighbor_counts', 'expand_node'] };\n}\nreturn [{ json: payload }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        0
+      ],
+      "id": "4930d6bf-2354-454e-8af8-d6db78a31d56",
+      "name": "Format Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        0
+      ],
+      "id": "98144af9-ce78-4f6c-a39f-3de155b1c898",
+      "name": "Respond JSON"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Request": {
+      "main": [
+        [
+          {
+            "node": "Build Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query": {
+      "main": [
+        [
+          {
+            "node": "Read Graph Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Request and Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Graph Data": {
+      "main": [
+        [
+          {
+            "node": "Merge Request and Result",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Request and Result": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Context": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Respond JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "tags": [
+    "ch5",
+    "graph",
+    "api",
+    "visualization"
+  ],
+  "versionId": "1"
+}

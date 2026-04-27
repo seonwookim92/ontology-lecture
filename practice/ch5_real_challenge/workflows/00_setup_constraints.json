@@ -1,0 +1,570 @@
+{
+  "name": "00 Setup Constraints & Indexes",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        0
+      ],
+      "id": "eda60e96-7349-4a52-9117-9b506e52d084",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT technique_id_unique IF NOT EXISTS FOR (n:Technique) REQUIRE n.technique_id IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        -160
+      ],
+      "id": "78f230d5-7c5f-4908-97fe-544ce9b29ee0",
+      "name": "Technique.technique_id",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT tactic_id_unique IF NOT EXISTS FOR (n:Tactic) REQUIRE n.tactic_id IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        -160
+      ],
+      "id": "56f0b3a4-704e-43a6-8f88-07080be39e80",
+      "name": "Tactic.tactic_id",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT actor_name_unique IF NOT EXISTS FOR (n:ThreatActor) REQUIRE n.name IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        -16
+      ],
+      "id": "19c01c6f-26a2-4a60-8749-ea4290294082",
+      "name": "ThreatActor.name",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT malware_name_unique IF NOT EXISTS FOR (n:Malware) REQUIRE n.name IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        -16
+      ],
+      "id": "447d12e8-2ebb-4cc1-9899-b818f057f880",
+      "name": "Malware.name",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT tool_name_unique IF NOT EXISTS FOR (n:Tool) REQUIRE n.name IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        128
+      ],
+      "id": "908d7fdd-a483-4016-876d-e9ef9df7b00f",
+      "name": "Tool.name",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT mitigation_id_unique IF NOT EXISTS FOR (n:Mitigation) REQUIRE n.mitigation_id IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        128
+      ],
+      "id": "5de5bcb4-f7fd-4ebe-8538-8123c0441a58",
+      "name": "Mitigation.mid",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT cve_id_unique IF NOT EXISTS FOR (n:Vulnerability) REQUIRE n.cve_id IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        272
+      ],
+      "id": "bab356cf-ffc6-4b3d-ad75-24c203cc2d4a",
+      "name": "Vulnerability.cve_id",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT indicator_value_unique IF NOT EXISTS FOR (n:Indicator) REQUIRE n.value IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        272
+      ],
+      "id": "b5691d74-bd05-4a3a-b532-752bbb08f6e2",
+      "name": "Indicator.value",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT incident_id_unique IF NOT EXISTS FOR (n:Incident) REQUIRE n.incident_id IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        416
+      ],
+      "id": "2083db4f-0d0b-4c7e-9660-88256230b9ea",
+      "name": "Incident.incident_id",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE CONSTRAINT victim_name_unique IF NOT EXISTS FOR (n:Victim) REQUIRE n.org_name IS UNIQUE;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        416
+      ],
+      "id": "4b9f7dd1-3d42-419b-9e70-084799352e92",
+      "name": "Victim.org_name",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE FULLTEXT INDEX technique_ft IF NOT EXISTS FOR (n:Technique) ON EACH [n.name, n.description];"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        560
+      ],
+      "id": "0e31590a-6f11-4605-8c65-6bcc5282e8c8",
+      "name": "FT: Technique",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE FULLTEXT INDEX actor_ft IF NOT EXISTS FOR (n:ThreatActor) ON EACH [n.name];"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        560
+      ],
+      "id": "92a09e04-064b-477f-bd25-151dcb81b5c2",
+      "name": "FT: ThreatActor",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE FULLTEXT INDEX malware_ft IF NOT EXISTS FOR (n:Malware) ON EACH [n.name];"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        704
+      ],
+      "id": "ac93fd5d-f60f-422a-b241-7f0dcc2f09c9",
+      "name": "FT: Malware",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE FULLTEXT INDEX vuln_ft IF NOT EXISTS FOR (n:Vulnerability) ON EACH [n.cve_id, n.name, n.description];"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        704
+      ],
+      "id": "30073cdc-f72a-4f25-a56c-1c43a9848c72",
+      "name": "FT: Vulnerability",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "CREATE FULLTEXT INDEX incident_ft IF NOT EXISTS FOR (n:Incident) ON EACH [n.title, n.summary];"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        848
+      ],
+      "id": "be18f74a-77a0-4921-8f87-e29ed6c810b3",
+      "name": "FT: Incident",
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Technique.technique_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Technique.technique_id": {
+      "main": [
+        [
+          {
+            "node": "Tactic.tactic_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tactic.tactic_id": {
+      "main": [
+        [
+          {
+            "node": "ThreatActor.name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ThreatActor.name": {
+      "main": [
+        [
+          {
+            "node": "Malware.name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Malware.name": {
+      "main": [
+        [
+          {
+            "node": "Tool.name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool.name": {
+      "main": [
+        [
+          {
+            "node": "Mitigation.mid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mitigation.mid": {
+      "main": [
+        [
+          {
+            "node": "Vulnerability.cve_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vulnerability.cve_id": {
+      "main": [
+        [
+          {
+            "node": "Indicator.value",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Indicator.value": {
+      "main": [
+        [
+          {
+            "node": "Incident.incident_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Incident.incident_id": {
+      "main": [
+        [
+          {
+            "node": "Victim.org_name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Victim.org_name": {
+      "main": [
+        [
+          {
+            "node": "FT: Technique",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FT: Technique": {
+      "main": [
+        [
+          {
+            "node": "FT: ThreatActor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FT: ThreatActor": {
+      "main": [
+        [
+          {
+            "node": "FT: Malware",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FT: Malware": {
+      "main": [
+        [
+          {
+            "node": "FT: Vulnerability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FT: Vulnerability": {
+      "main": [
+        [
+          {
+            "node": "FT: Incident",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3d82b3f9-71e4-4cd8-8f1e-b3dd583467e5",
+  "meta": {
+    "instanceId": "ch5-practice"
+  },
+  "id": "90C08205",
+  "tags": []
+}

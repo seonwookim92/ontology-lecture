@@ -1,0 +1,306 @@
+{
+  "name": "05 Text2Cypher Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "aa7b014c-0b52-45d9-9f00-2302d8264d30",
+      "name": "When chat message received",
+      "webhookId": "4f651f89-b96b-49a5-9e12-f7f6352b05ed"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/get-schema",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"properties\": {}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        128
+      ],
+      "id": "f9ca1496-3722-4e2a-b6da-9bbe64849638",
+      "name": "Get Schema"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "schema",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        432,
+        128
+      ],
+      "id": "5198f9e9-b63d-48d7-b9a7-0fac09cce780",
+      "name": "Aggregate Schema"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        656,
+        0
+      ],
+      "id": "a786eba1-a849-4d2d-b20b-57112781ae5c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        880,
+        0
+      ],
+      "id": "d6f89120-5a8c-4bb1-9b3e-e00e9d94c0ab",
+      "name": "Aggregate All"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "77497502-5291-406f-91ad-80e7506ce434",
+              "name": "chatInput",
+              "value": "={{ $json.data[0].chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "d3d3c9f6-9c98-4ffa-9c90-c03b89979b38",
+              "name": "sessionId",
+              "value": "={{ $json.data[0].sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "4949b740-a88c-487d-ae10-d39ee382afe1",
+              "name": "schema",
+              "value": "={{ $json.data[1].schema }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "e41d8b1c-0107-4735-ba8e-18e95dbcf0a4",
+      "name": "Set Context"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen3.5-35b",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1552,
+        224
+      ],
+      "id": "c1e487cd-fa9b-48ef-8191-fd5c12bd115b",
+      "name": "vLLM Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "GAnv0w5e7r45WGtw",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1680,
+        224
+      ],
+      "id": "fa0bd860-ef46-457e-a07c-9802022974ac",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=You are a security knowledge graph analyst. You translate natural language questions into Cypher queries for a Neo4j graph containing:\n\n**Node Labels & Primary Keys:**\n- Technique (technique_id: T-code)\n- Tactic (tactic_id: TA-code)\n- ThreatActor (name)\n- Malware (name)\n- Tool (name)\n- Mitigation (mitigation_id: M-code)\n- Vulnerability (cve_id: CVE-XXXX-XXXXX)\n- Indicator (value: URL)\n- Incident (incident_id)\n- Victim (org_name)\n- IPAddress (ip), Domain (domain)\n\n**Relationships:**\n- (Technique)-[:BELONGS_TO]->(Tactic)\n- (Technique)-[:SUBTECHNIQUE_OF]->(Technique)\n- (ThreatActor)-[:USES_TECHNIQUE]->(Technique)\n- (ThreatActor)-[:USES_MALWARE]->(Malware)\n- (ThreatActor)-[:USES_TOOL]->(Tool)\n- (Malware)-[:USES_TECHNIQUE]->(Technique)\n- (Mitigation)-[:MITIGATES]->(Technique)\n- (Indicator)-[:HOSTED_ON]->(IPAddress|Domain)\n- (Indicator)-[:EXPLOITS]->(Vulnerability)\n- (Indicator)-[:INDICATES]->(Malware)\n- (Incident)-[:TARGETED]->(Victim)\n- (Incident)-[:ATTRIBUTED_TO]->(ThreatActor)\n- (Incident)-[:USES_TECHNIQUE]->(Technique)\n- (Incident)-[:EXPLOITED]->(Vulnerability)\n- (Incident)-[:INVOLVES_MALWARE]->(Malware)\n- (Incident)-[:INVOLVES_INDICATOR]->(Indicator)\n\n**Runtime Input:**\n- User request: {{ $json.chatInput }}\n- Current schema: {{ $json.schema }}\n\n**Rules:**\n1. Always use read-cypher tool at least once before answering.\n2. Never guess — base answers on actual query results.\n3. Use LIMIT for open-ended queries (unless user asks for all).\n4. Answer in Korean.\n5. Show the Cypher query used at the beginning of your answer.\n6. Use FULLTEXT search for keyword queries: CALL db.index.fulltext.queryNodes('technique_ft', $keyword) YIELD node"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1328,
+        0
+      ],
+      "id": "a8cc101d-dc77-4a76-b8fe-135ac5f088f3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Execute a read-only Cypher query on the Neo4j security knowledge graph",
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/read-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1808,
+        224
+      ],
+      "id": "dda57140-f650-4d23-bf90-f6c6013ea205",
+      "name": "read-cypher"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Get Schema",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Schema": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Schema": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate All": {
+      "main": [
+        [
+          {
+            "node": "Set Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Context": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "vLLM Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read-cypher": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5613145f-3022-449c-ac79-9de4374f5346",
+  "meta": {
+    "instanceId": "ch5-practice"
+  },
+  "id": "A7D7BBE4",
+  "tags": []
+}

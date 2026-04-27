@@ -1,0 +1,1349 @@
+{
+  "name": "01 Load MITRE ATT&CK",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        8992,
+        -448
+      ],
+      "id": "7b01846b-6ac8-49cb-8d4a-472a9adfdab1",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/mitre/tactics.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        9456,
+        -448
+      ],
+      "id": "b15d4014-c6a2-45b5-9616-0f9c3aed4324",
+      "name": "Read Tactics"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        9680,
+        -448
+      ],
+      "id": "ba488307-c1c2-4af6-8dad-b3ebc5c077e2",
+      "name": "Parse Tactics"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nfor (const item of $input.all()) {\n  const data = item.json;\n  const records = Array.isArray(data) ? data : [data];\n  for (const record of records) {\n    output.push({ json: record });\n  }\n}\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9456,
+        -240
+      ],
+      "id": "4e5505f3-4ffe-408b-95e0-f8107fd7a765",
+      "name": "Normalize Tactics"
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $input.all();\nconst out = [];\nfor (let offset = 0; offset < all.length; offset += 10) {\n  const batch = all.slice(offset, offset + 10);\n  const rows = batch.map(i => {\n    const r = i.json;\n    const esc = s => String(s||'').replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\").substring(0,500);\n    return `{tactic_id:'${esc(r.tactic_id)}',name:'${esc(r.name)}',shortname:'${esc(r.shortname)}',description:'${esc(r.description)}'}`;\n  }).join(',');\n  if (!rows) continue;\n  out.push({json: {query:\n`UNWIND [${rows}] AS row\nMERGE (t:Tactic {tactic_id: row.tactic_id})\nSET t.name = row.name, t.shortname = row.shortname, t.description = row.description`\n  }});\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9680,
+        -240
+      ],
+      "id": "1643403b-e8ed-4fad-90d6-432b973e33c9",
+      "name": "Build Tactics Queries"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        9920,
+        -240
+      ],
+      "id": "49002016-cc4a-4121-9dd1-4147812376f2",
+      "name": "MERGE Tactics",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        10144,
+        -240
+      ],
+      "id": "a7d8d7ba-6999-4efb-8a51-5adbe72c6fa8",
+      "name": "Done Tactics"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/mitre/techniques.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        10544,
+        -240
+      ],
+      "id": "16204bbd-7428-403d-a990-c0c84632bfff",
+      "name": "Read Techniques"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        10768,
+        -240
+      ],
+      "id": "81e0e64e-8245-4282-913f-22e6de08b81a",
+      "name": "Parse Techniques"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nfor (const item of $input.all()) {\n  const data = item.json;\n  const records = Array.isArray(data) ? data : [data];\n  for (const record of records) {\n    output.push({ json: record });\n  }\n}\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10544,
+        -32
+      ],
+      "id": "ecaa64d7-91ad-48ac-ac7d-152055442060",
+      "name": "Normalize Techniques"
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $input.all();\nconst out = [];\nfor (let offset = 0; offset < all.length; offset += 50) {\n  const batch = all.slice(offset, offset + 50);\n  const rows = batch.map(i => {\n    const r = i.json;\n    const esc = s => String(s||'').replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\").substring(0,500);\n    return `{technique_id:'${esc(r.technique_id)}',name:'${esc(r.name)}',description:'${esc(r.description)}',is_sub:${!!r.is_subtechnique},platforms:'${esc((r.platforms||[]).join(','))}'}`;\n  }).join(',');\n  if (!rows) continue;\n  out.push({json: {query:\n`UNWIND [${rows}] AS row\nMERGE (t:Technique {technique_id: row.technique_id})\nSET t.name = row.name, t.description = row.description,\n    t.is_subtechnique = row.is_sub, t.platforms = row.platforms`\n  }});\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10768,
+        -32
+      ],
+      "id": "250ea880-a4c2-44f2-8253-b72a02b716ac",
+      "name": "Build Techniques Queries"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        11008,
+        -32
+      ],
+      "id": "7005c9ba-eed1-4fb0-a731-12a11ad51110",
+      "name": "MERGE Techniques",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        11216,
+        -32
+      ],
+      "id": "dc478db5-d3b4-4aa8-8730-f88aec345d6e",
+      "name": "Done Techniques"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/mitre/threat_actors.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        11600,
+        -32
+      ],
+      "id": "f4bdb22c-79f9-4935-acd9-0990825c7b59",
+      "name": "Read Actors"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        11824,
+        -32
+      ],
+      "id": "17bc1df8-4844-4955-b319-3c6655be96dd",
+      "name": "Parse Actors"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nfor (const item of $input.all()) {\n  const data = item.json;\n  const records = Array.isArray(data) ? data : [data];\n  for (const record of records) {\n    output.push({ json: record });\n  }\n}\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11600,
+        160
+      ],
+      "id": "76805efc-7cb3-4df9-8dec-c3e60dfdff20",
+      "name": "Normalize Actors"
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $input.all();\nconst out = [];\nfor (let offset = 0; offset < all.length; offset += 50) {\n  const batch = all.slice(offset, offset + 50);\n  const rows = batch.map(i => {\n    const r = i.json;\n    const esc = s => String(s||'').replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\").substring(0,500);\n    return `{name:'${esc(r.name)}',aliases:'${esc((r.aliases||[]).join(','))}',description:'${esc(r.description)}'}`;\n  }).join(',');\n  if (!rows) continue;\n  out.push({json: {query:\n`UNWIND [${rows}] AS row\nMERGE (a:ThreatActor {name: row.name})\nSET a.aliases = row.aliases, a.description = row.description`\n  }});\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        11824,
+        160
+      ],
+      "id": "c32350f4-440b-49ca-adb3-16196e50294f",
+      "name": "Build Actors Queries"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        12048,
+        160
+      ],
+      "id": "4b8d1341-ad8a-4638-ad31-be2be8599244",
+      "name": "MERGE Actors",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        12288,
+        160
+      ],
+      "id": "e4eaee1a-432e-4f37-961a-53701d22f58a",
+      "name": "Done Actors"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/mitre/malware.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        12640,
+        160
+      ],
+      "id": "3614c2b7-e036-4431-a610-2b8a6588ceb8",
+      "name": "Read Malware"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        12864,
+        160
+      ],
+      "id": "220b1ae3-9605-4063-aebf-b9c1204ff948",
+      "name": "Parse Malware"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nfor (const item of $input.all()) {\n  const data = item.json;\n  const records = Array.isArray(data) ? data : [data];\n  for (const record of records) {\n    output.push({ json: record });\n  }\n}\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        12640,
+        352
+      ],
+      "id": "d59b984e-34a5-4038-9741-d87f0c9cd844",
+      "name": "Normalize Malware"
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $input.all();\nconst out = [];\nfor (let offset = 0; offset < all.length; offset += 50) {\n  const batch = all.slice(offset, offset + 50);\n  const rows = batch.map(i => {\n    const r = i.json;\n    const esc = s => String(s||'').replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\").substring(0,500);\n    return `{name:'${esc(r.name)}',malware_type:'${esc(r.malware_type)}',description:'${esc(r.description)}'}`;\n  }).join(',');\n  if (!rows) continue;\n  out.push({json: {query:\n`UNWIND [${rows}] AS row\nMERGE (m:Malware {name: row.name})\nSET m.malware_type = row.malware_type, m.description = row.description`\n  }});\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        12864,
+        352
+      ],
+      "id": "9d23401e-7fc3-4fa3-a1dc-d6f61e4a60ee",
+      "name": "Build Malware Queries"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        13072,
+        352
+      ],
+      "id": "1fc4431d-0594-49a5-af8d-fc44a6994073",
+      "name": "MERGE Malware",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        13296,
+        352
+      ],
+      "id": "65791a9e-85e5-4044-bc16-763c7b15caa3",
+      "name": "Done Malware"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/mitre/tools.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        13648,
+        352
+      ],
+      "id": "48046ea4-199f-42d7-b93e-a22653e62dd0",
+      "name": "Read Tools"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        13872,
+        352
+      ],
+      "id": "a9735415-4ef8-4c2d-85f9-8db9bdb01b2e",
+      "name": "Parse Tools"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nfor (const item of $input.all()) {\n  const data = item.json;\n  const records = Array.isArray(data) ? data : [data];\n  for (const record of records) {\n    output.push({ json: record });\n  }\n}\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13648,
+        544
+      ],
+      "id": "87956253-e245-4322-9840-ae1f21161c82",
+      "name": "Normalize Tools"
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $input.all();\nconst out = [];\nfor (let offset = 0; offset < all.length; offset += 50) {\n  const batch = all.slice(offset, offset + 50);\n  const rows = batch.map(i => {\n    const r = i.json;\n    const esc = s => String(s||'').replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\").substring(0,500);\n    return `{name:'${esc(r.name)}',tool_type:'${esc(r.tool_type)}',description:'${esc(r.description)}'}`;\n  }).join(',');\n  if (!rows) continue;\n  out.push({json: {query:\n`UNWIND [${rows}] AS row\nMERGE (t:Tool {name: row.name})\nSET t.tool_type = row.tool_type, t.description = row.description`\n  }});\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        13872,
+        544
+      ],
+      "id": "2265f78d-2836-4e67-907c-affd13688360",
+      "name": "Build Tools Queries"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        14096,
+        544
+      ],
+      "id": "1be57b1a-21b0-43e9-a6d5-03b81836f6b3",
+      "name": "MERGE Tools",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        14304,
+        544
+      ],
+      "id": "59bcada5-8a88-45ef-b3a2-d40cde72fe15",
+      "name": "Done Tools"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/mitre/mitigations.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        14704,
+        544
+      ],
+      "id": "51fdc5e6-09f4-446e-8fae-cb14d65351a3",
+      "name": "Read Mitigations"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        14928,
+        544
+      ],
+      "id": "7f903bdc-973e-4346-878d-20f2432eefd2",
+      "name": "Parse Mitigations"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nfor (const item of $input.all()) {\n  const data = item.json;\n  const records = Array.isArray(data) ? data : [data];\n  for (const record of records) {\n    output.push({ json: record });\n  }\n}\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14704,
+        768
+      ],
+      "id": "84e58ad0-4631-49d6-9bb5-019b919001cd",
+      "name": "Normalize Mitigations"
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $input.all();\nconst out = [];\nfor (let offset = 0; offset < all.length; offset += 50) {\n  const batch = all.slice(offset, offset + 50);\n  const rows = batch.map(i => {\n    const r = i.json;\n    const esc = s => String(s||'').replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\").substring(0,500);\n    return `{mitigation_id:'${esc(r.mitigation_id)}',name:'${esc(r.name)}',description:'${esc(r.description)}'}`;\n  }).join(',');\n  if (!rows) continue;\n  out.push({json: {query:\n`UNWIND [${rows}] AS row\nMERGE (m:Mitigation {mitigation_id: row.mitigation_id})\nSET m.name = row.name, m.description = row.description`\n  }});\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        14928,
+        768
+      ],
+      "id": "f01def89-766e-4852-a738-edbfe206c9bc",
+      "name": "Build Mitigations Queries"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        15136,
+        768
+      ],
+      "id": "197db3fc-722c-43e5-b5e4-4b09a52cc77b",
+      "name": "MERGE Mitigations",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        15344,
+        768
+      ],
+      "id": "46d0f7f5-f2f0-427f-9ea1-d03a3f872620",
+      "name": "Done Mitigations"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/mitre/relationships.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        15808,
+        768
+      ],
+      "id": "486bd298-af92-461a-b21c-857b0772f151",
+      "name": "Read Relationships"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        16032,
+        768
+      ],
+      "id": "5bfd87ff-eb5a-4cea-920d-c67199d052d2",
+      "name": "Parse Relationships"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nfor (const item of $input.all()) {\n  const data = item.json;\n  const records = Array.isArray(data) ? data : [data];\n  for (const record of records) {\n    output.push({ json: record });\n  }\n}\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        15808,
+        976
+      ],
+      "id": "ea7b3e07-4a82-4aa8-bc36-25e5c1246443",
+      "name": "Normalize Relationships"
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $input.all();\nconst out = [];\nfor (let offset = 0; offset < all.length; offset += 50) {\n  const batch = all.slice(offset, offset + 50);\n  const calls = batch.map(i => {\n    const r = i.json;\n    const esc = s => String(s||'').replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\");\n    return `CALL { OPTIONAL MATCH (s:${r.src_label} {${r.src_key}: '${esc(r.src_val)}'}) OPTIONAL MATCH (d:${r.dst_label} {${r.dst_key}: '${esc(r.dst_val)}'}) WITH s,d WHERE s IS NOT NULL AND d IS NOT NULL MERGE (s)-[:${r.neo4j_rel}]->(d) }`;\n  }).join('\\n');\n  if (!calls) continue;\n  out.push({json: {query: calls}});\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16032,
+        976
+      ],
+      "id": "4a4a84c6-ac1b-4de3-9e04-71f3da0d3b83",
+      "name": "Build Relationships Queries"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        16576,
+        1104
+      ],
+      "id": "ab63d675-a899-4a92-a0a8-a7b2b17146ad",
+      "name": "MERGE Relationships",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        16576,
+        960
+      ],
+      "id": "92971be8-530a-4825-aebd-036fd40317d2",
+      "name": "Done Relationships"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        9920,
+        -448
+      ],
+      "id": "4882caf3-321b-4b47-8be7-dfd55535a722",
+      "name": "Split Out Tactics"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        11008,
+        -240
+      ],
+      "id": "4293d4ef-ca33-47cc-99b6-c57943c98029",
+      "name": "Split Out Techniques"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        12048,
+        -32
+      ],
+      "id": "94e2e2bb-8088-4ec4-85eb-80cf0a7ec728",
+      "name": "Split Out Actors"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        13072,
+        160
+      ],
+      "id": "2daa22f4-d5bf-46a2-8261-c8e27601f53a",
+      "name": "Split Out Malware"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        14096,
+        352
+      ],
+      "id": "7ab26728-4889-4486-9132-0093c9226391",
+      "name": "Split Out Tools"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        15136,
+        544
+      ],
+      "id": "c0e14550-7f07-49ba-823f-30221b3be7e6",
+      "name": "Split Out Mitigations"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        16256,
+        768
+      ],
+      "id": "738bb2d7-20a2-4d3e-a7c3-aff2eaacd818",
+      "name": "Split Out Relationships"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        16256,
+        976
+      ],
+      "id": "73073748-1901-47a6-ac53-bd8b4d76d3d1",
+      "name": "Loop Over Items"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Read Tactics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Tactics": {
+      "main": [
+        [
+          {
+            "node": "Parse Tactics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Tactics": {
+      "main": [
+        [
+          {
+            "node": "Split Out Tactics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Tactics": {
+      "main": [
+        [
+          {
+            "node": "Build Tactics Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Tactics Queries": {
+      "main": [
+        [
+          {
+            "node": "MERGE Tactics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE Tactics": {
+      "main": [
+        [
+          {
+            "node": "Done Tactics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Done Tactics": {
+      "main": [
+        [
+          {
+            "node": "Read Techniques",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Techniques": {
+      "main": [
+        [
+          {
+            "node": "Parse Techniques",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Techniques": {
+      "main": [
+        [
+          {
+            "node": "Split Out Techniques",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Techniques": {
+      "main": [
+        [
+          {
+            "node": "Build Techniques Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Techniques Queries": {
+      "main": [
+        [
+          {
+            "node": "MERGE Techniques",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE Techniques": {
+      "main": [
+        [
+          {
+            "node": "Done Techniques",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Done Techniques": {
+      "main": [
+        [
+          {
+            "node": "Read Actors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Actors": {
+      "main": [
+        [
+          {
+            "node": "Parse Actors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Actors": {
+      "main": [
+        [
+          {
+            "node": "Split Out Actors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Actors": {
+      "main": [
+        [
+          {
+            "node": "Build Actors Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Actors Queries": {
+      "main": [
+        [
+          {
+            "node": "MERGE Actors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE Actors": {
+      "main": [
+        [
+          {
+            "node": "Done Actors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Done Actors": {
+      "main": [
+        [
+          {
+            "node": "Read Malware",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Malware": {
+      "main": [
+        [
+          {
+            "node": "Parse Malware",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Malware": {
+      "main": [
+        [
+          {
+            "node": "Split Out Malware",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Malware": {
+      "main": [
+        [
+          {
+            "node": "Build Malware Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Malware Queries": {
+      "main": [
+        [
+          {
+            "node": "MERGE Malware",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE Malware": {
+      "main": [
+        [
+          {
+            "node": "Done Malware",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Done Malware": {
+      "main": [
+        [
+          {
+            "node": "Read Tools",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Tools": {
+      "main": [
+        [
+          {
+            "node": "Parse Tools",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Tools": {
+      "main": [
+        [
+          {
+            "node": "Split Out Tools",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Tools": {
+      "main": [
+        [
+          {
+            "node": "Build Tools Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Tools Queries": {
+      "main": [
+        [
+          {
+            "node": "MERGE Tools",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE Tools": {
+      "main": [
+        [
+          {
+            "node": "Done Tools",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Done Tools": {
+      "main": [
+        [
+          {
+            "node": "Read Mitigations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Mitigations": {
+      "main": [
+        [
+          {
+            "node": "Parse Mitigations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Mitigations": {
+      "main": [
+        [
+          {
+            "node": "Split Out Mitigations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Mitigations": {
+      "main": [
+        [
+          {
+            "node": "Build Mitigations Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Mitigations Queries": {
+      "main": [
+        [
+          {
+            "node": "MERGE Mitigations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE Mitigations": {
+      "main": [
+        [
+          {
+            "node": "Done Mitigations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Done Mitigations": {
+      "main": [
+        [
+          {
+            "node": "Read Relationships",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Relationships": {
+      "main": [
+        [
+          {
+            "node": "Parse Relationships",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Relationships": {
+      "main": [
+        [
+          {
+            "node": "Split Out Relationships",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Relationships": {
+      "main": [
+        [
+          {
+            "node": "Build Relationships Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Relationships Queries": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE Relationships": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Tactics": {
+      "main": [
+        [
+          {
+            "node": "Normalize Tactics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Techniques": {
+      "main": [
+        [
+          {
+            "node": "Normalize Techniques",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Actors": {
+      "main": [
+        [
+          {
+            "node": "Normalize Actors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Malware": {
+      "main": [
+        [
+          {
+            "node": "Normalize Malware",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Tools": {
+      "main": [
+        [
+          {
+            "node": "Normalize Tools",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Mitigations": {
+      "main": [
+        [
+          {
+            "node": "Normalize Mitigations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Relationships": {
+      "main": [
+        [
+          {
+            "node": "Normalize Relationships",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Done Relationships",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MERGE Relationships",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "72d6f8a0-8147-45a1-bf52-7119485dc692",
+  "meta": {
+    "instanceId": "f962da71cc3c2bf75c6be8a1677d16974c29e5ce29b76687fb9f2f072416354b"
+  },
+  "id": "5uLwZeSc6PfD79St",
+  "tags": []
+}

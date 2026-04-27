@@ -1,0 +1,226 @@
+{
+  "name": "04 Load Incidents",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8901ce34-3da9-46bc-b7c8-91e51b997bfb",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/incidents/incidents.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        0
+      ],
+      "id": "c3265099-2bf4-42f5-8fea-e6fb2e33bc19",
+      "name": "Read Incidents"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        0
+      ],
+      "id": "c118cb8d-8865-43a8-8618-171792817348",
+      "name": "Parse Incidents"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        704,
+        0
+      ],
+      "id": "59d7ad4e-cd93-4219-b5af-50a0fe735505",
+      "name": "Split Out Incidents"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nfor (const item of $input.all()) {\n  const data = item.json;\n  const records = Array.isArray(data) ? data : [data];\n  for (const record of records) {\n    output.push({ json: record });\n  }\n}\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        0
+      ],
+      "id": "fdf0d548-d5a2-41ae-a5e1-8a2df35da59f",
+      "name": "Normalize Incidents"
+    },
+    {
+      "parameters": {
+        "batchSize": 20,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1152,
+        0
+      ],
+      "id": "e657d4e8-654a-4db8-8c25-a3a033b177cb",
+      "name": "Split Incidents"
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = s => String(s || '').replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\");\nconst calls = [];\nfor (const item of $input.all()) {\n  const inc = item.json;\n  const iid = esc(inc.incident_id);\n  calls.push(`CALL {\n  MERGE (inc:Incident {incident_id:'${iid}'})\n  SET inc.title='${esc(inc.title)}', inc.timestamp='${esc(inc.timestamp)}', inc.summary='${esc(inc.summary)}'\n  MERGE (vic:Victim {org_name:'${esc(inc.org_name)}'})\n  SET vic.system='${esc(inc.system)}', vic.industry='${esc(inc.industry)}', vic.country='${esc(inc.country)}'\n  MERGE (inc)-[:TARGETED]->(vic)\n}`);\n  if (inc.threat_actor) {\n    calls.push(`CALL {\n  MATCH (inc:Incident {incident_id:'${iid}'})\n  MERGE (a:ThreatActor {name:'${esc(inc.threat_actor)}'})\n  MERGE (inc)-[r:ATTRIBUTED_TO]->(a)\n  SET r.confidence='${esc(inc.confidence || '')}'\n}`);\n  }\n  for (const step of (inc.attack_flow || [])) {\n    const techniqueId = esc(step.technique_id || '');\n    const techniqueName = esc(step.technique_name || '');\n    const phase = esc(step.phase || '');\n    const outcome = esc(step.outcome || '');\n    if (techniqueId) {\n      calls.push(`CALL {\n  MATCH (inc:Incident {incident_id:'${iid}'})\n  MERGE (t:Technique {technique_id:'${techniqueId}'})\n  SET t.name = coalesce(t.name, '${techniqueName}')\n  MERGE (inc)-[:USES_TECHNIQUE {phase:'${phase}',outcome:'${outcome}'}]->(t)\n}`);\n    }\n    const rel = step.related_entity || {};\n    const rtype = rel.type || '';\n    const rval = esc(rel.value || '');\n    if (rtype === 'Vulnerability' && rval.startsWith('CVE')) {\n      calls.push(`CALL {\n  MATCH (inc:Incident {incident_id:'${iid}'})\n  MERGE (v:Vulnerability {cve_id:'${rval}'})\n  MERGE (inc)-[:EXPLOITED]->(v)\n}`);\n    } else if (rtype === 'Malware' && rval) {\n      calls.push(`CALL {\n  MATCH (inc:Incident {incident_id:'${iid}'})\n  MERGE (m:Malware {name:'${rval}'})\n  MERGE (inc)-[:INVOLVES_MALWARE]->(m)\n}`);\n    } else if (rtype === 'Indicator' && rval) {\n      calls.push(`CALL {\n  MATCH (inc:Incident {incident_id:'${iid}'})\n  MERGE (ind:Indicator {value:'${rval}'})\n  MERGE (inc)-[:INVOLVES_INDICATOR]->(ind)\n}`);\n    } else if (rtype === 'Threat Group' && rval) {\n      calls.push(`CALL {\n  MATCH (inc:Incident {incident_id:'${iid}'})\n  MERGE (a:ThreatActor {name:'${rval}'})\n  MERGE (inc)-[:ATTRIBUTED_TO]->(a)\n}`);\n    }\n  }\n}\nif (calls.length === 0) return [];\nreturn [{json:{query: calls.join('\\n')}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        128
+      ],
+      "id": "87abfb74-b1b3-4abd-99d5-970f2f89f010",
+      "name": "Build Incidents Batch Query"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1616,
+        128
+      ],
+      "id": "fcdb6ea1-b34f-4c1d-81fc-08ef8e0d90e3",
+      "name": "MERGE Incidents Batch",
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Read Incidents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Incidents": {
+      "main": [
+        [
+          {
+            "node": "Parse Incidents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Incidents": {
+      "main": [
+        [
+          {
+            "node": "Split Out Incidents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Incidents": {
+      "main": [
+        [
+          {
+            "node": "Normalize Incidents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Incidents": {
+      "main": [
+        [
+          {
+            "node": "Split Incidents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Incidents": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Build Incidents Batch Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Incidents Batch Query": {
+      "main": [
+        [
+          {
+            "node": "MERGE Incidents Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE Incidents Batch": {
+      "main": [
+        [
+          {
+            "node": "Split Incidents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4ffd345c-9359-4c29-838e-e00624e7b92f",
+  "meta": {
+    "instanceId": "f962da71cc3c2bf75c6be8a1677d16974c29e5ce29b76687fb9f2f072416354b"
+  },
+  "id": "CR0FOKWERgwybT9e",
+  "tags": []
+}

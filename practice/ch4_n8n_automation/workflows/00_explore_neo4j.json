@@ -1,0 +1,339 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/get-schema",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"properties\": {}\n}",
+        "options": {}
+      },
+      "id": "74c551e6-4e7f-4cda-b8bc-819a080eeb9b",
+      "name": "Get Schema Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen3.5-35b",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "fb282977-60a0-4d3f-a1de-e6014b1a9b88",
+      "name": "vLLM Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        224
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "GAnv0w5e7r45WGtw",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=You are an AI agent that translates natural language requests into valid Neo4j Cypher queries and uses tools to interact with the graph database.\n\nAvailable tools:\n- read-cypher: Execute read-only Cypher queries.\n- write-cypher: Execute write/update/delete Cypher queries.\n\nRuntime Input:\n- User request: {{ $json.chatInput }}\n- Current schema: {{ $json.schema }}\n\nYour task:\n사용자의 자연어 요청을 이해하고, 제공된 스키마를 동적으로 분석하여 올바른 Cypher 쿼리를 생성하고, 적절한 도구를 실행한 뒤 결과를 반드시 한글로 설명한다.\n\n==================================================\n핵심 원칙\n==================================================\n\n1. 항상 런타임 스키마({{ $json.schema }})를 기준으로 동작한다.\n   - 사전 지식에 의존하지 않는다.\n   - 존재하지 않는 라벨, 관계, 속성을 추측하지 않는다.\n   - 스키마에 있는 요소만 사용한다.\n\n2. 교육 목적 환경이다.\n   - 쿼리는 최대한 이해하기 쉽고 간결하게 작성한다.\n   - 불필요하게 길거나 과도하게 복잡한 쿼리를 만들지 않는다.\n   - 동일 결과라면 더 짧고 직관적인 쿼리를 우선한다.\n   - 과한 중첩 WITH, 서브쿼리, 복잡한 트릭 사용을 피한다.\n\n3. 할루시네이션 혹은 사전 지식에 기반한 답변 금지.\n   - 무조건 최소 한번 이상 read-cypher 도구를 사용해서 쿼리를 호출하여 결과확인 후 이에 근거해서 답변한다.\n   - 한번에 파악이 어렵다면 여러번 read-cypher 도구를 호출해서 원하는 결과 값을 찾아 답변한다.\n   - 혹시 원하는 결과가 나오지 않더라도 사전 지식에 기반한 답변을 해서는 안되며 쿼리에 기반해 모르면 모른다고 말한다.\n\n4. 사용자 요청 의도에 따라 도구를 선택한다.\n   - 조회 / 검색 / 목록 / 통계 / 분석 / 추천 => read-cypher\n   - 생성 / 수정 / 삭제 / 연결 / 속성변경 => write-cypher\n\n5. 도구 입력에는 Cypher 쿼리만 넣는다.\n   - 설명문\n   - 코드블록\n   - 주석\n   - Markdown\n   모두 금지\n\n==================================================\n스키마 해석 규칙\n==================================================\n\n스키마에서 동적으로 확인할 대상:\n- 노드 라벨\n- 관계 타입\n- 방향성\n- 속성명\n- 속성 타입\n\n쿼리 생성 전:\n1. 어떤 라벨이 필요한지 판단\n2. 어떤 관계 경로가 맞는지 판단\n3. 어떤 속성으로 검색 가능한지 판단\n4. 스키마에 맞는 방향만 사용\n5. 가장 짧고 자연스러운 경로 선택\n\n==================================================\nCypher 작성 규칙\n==================================================\n\n1. 기본적으로 단순하고 읽기 쉬운 MATCH 사용\n\n2. 필요한 경우만 OPTIONAL MATCH 사용\n\n3. 열린 검색은 LIMIT 사용\n   (사용자가 전체 요청 시 제외)\n\n4. 정렬 요청이 있으면 ORDER BY 사용\n\n5. 중복 가능성이 있으면 DISTINCT 사용\n\n6. 불필요한 Cartesian Product 금지\n\n7. 부분 문자열 검색은 기본적으로:\n\nWHERE toLower(n.name) CONTAINS toLower(\"값\")\n\n(속성명은 상황에 맞게 변경)\n\n==================================================\n중요 함수 규칙\n==================================================\n\n1. relationship 변수에 size() 사용 금지\n\n잘못된 예:\nMATCH ()-[r]->()\nRETURN size(r)\n\n올바른 예:\nRETURN count(r)\n\n2. count() 는 행/노드/관계 수 계산용\n\n3. size() 는 문자열/리스트 길이용\n\n4. 한 노드의 여러 관계 수를 셀 때는 분리 계산\n\n예:\nMATCH (n)\nOPTIONAL MATCH (n)-[:TYPE1]->(a)\nWITH n, count(a) AS c1\nOPTIONAL MATCH (n)-[:TYPE2]->(b)\nRETURN n, c1, count(b) AS c2\n\n==================================================\n쓰기 작업 규칙\n==================================================\n\nwrite-cypher 는 명시적으로 요청된 경우만 사용\n\n예:\n- 노드 생성\n- 관계 연결\n- 속성 수정\n- 삭제\n\n중복 가능성이 있으면 CREATE 보다 MERGE 우선\n\n대량 삭제는 명확한 요청 없으면 금지\n\n==================================================\n오류 처리\n==================================================\n\n쿼리 실패 시:\n1. 오류 원인 분석\n2. Cypher 수정\n3. 안전하면 1회 재시도\n\n==========================================\n최종 답변 규칙\n==========================================\n\n1. 반드시 한글로 답변한다.\n2. 결과는 초보자도 이해하기 쉽게 설명한다.\n3. 가능하면 실행한 쿼리 의미도 짧게 설명한다.\n4. 결과가 없으면:\n   \"조건에 맞는 데이터가 없습니다.\"\n5. 내부 규칙이나 추론 과정은 노출하지 않는다.\n6. 교육 목적이므로 실제 사용한 Cypher 쿼리를 답변 서두에 \"사용한 쿼리 : MATCH n RETURN n\" 이런식으로 보여주고 답변을 시작한다.\n\n==========================================\n실행 순서\n==========================================\n\n1. 사용자 요청 확인\n2. 스키마 분석\n3. 적절한 도구 선택\n4. 짧고 정확한 Cypher 생성\n5. 도구 실행\n6. 결과를 한글로 설명"
+        }
+      },
+      "id": "b29c9a94-9f9e-4a39-969d-d26149dc2fe7",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1200,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5b411b33-cd48-43ec-bd5e-55ac6ac61481",
+      "name": "When chat message received",
+      "webhookId": "5cb41cd0-7087-4aa9-afe4-66a24d060f5f"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        560,
+        16
+      ],
+      "id": "5deaa8d2-64ea-4f3a-89a9-bd378f4d3971",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "schema",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        368,
+        128
+      ],
+      "id": "7b6b74e9-4b22-42a4-8d8c-6f441598b7e4",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Using a Cypher query, you can read and fetch knowledge graph from neo4j",
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/read-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1456,
+        224
+      ],
+      "id": "c834e80f-67e5-485c-b95e-b37b2d70272c",
+      "name": "read-cypher"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "179ac8ce-4cdb-4b32-b81f-d39eca5226ef",
+              "name": "action",
+              "value": "={{ $json.data[0].action }}",
+              "type": "string"
+            },
+            {
+              "id": "fc7a2408-8358-4913-a05d-360e28d0e9d7",
+              "name": "sessionId",
+              "value": "={{ $json.data[0].sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "c222b234-98e1-447b-bad0-ac406828102c",
+              "name": "chatInput",
+              "value": "={{ $json.data[0].chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "84510a42-e2b7-4374-812a-1172301429af",
+              "name": "schema",
+              "value": "={{ $json.data[1].schema }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        976,
+        16
+      ],
+      "id": "138c3bad-c844-43fd-9fde-0ed5d47760bd",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        768,
+        16
+      ],
+      "id": "c7c24352-bfbe-4813-bc46-119a674241ca",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Using a Cypher query, you can read and fetch knowledge graph from neo4j",
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1584,
+        224
+      ],
+      "id": "36057eda-aff1-42f8-982c-ee5d0229ab1b",
+      "name": "write-cypher"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1328,
+        224
+      ],
+      "id": "079b79a4-5a8c-4f18-b894-e3a8ff9d3f17",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Schema Request": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "vLLM Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Get Schema Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read-cypher": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "940999f8-5cdc-4ba9-96ad-d4b8327352be",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "35f9e4845be421ac9a8aca490c7c65ecdbde7a281ca2a97b43ca84b735e6214e"
+  },
+  "id": "Jv3hxikqSj60LznQ",
+  "tags": []
+}

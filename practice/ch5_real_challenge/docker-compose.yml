@@ -1,0 +1,124 @@
+version: '3.8'
+
+# =============================================================================
+# CH5 Real Challenge — Docker Compose
+#
+# 서비스 구성:
+#   neo4j      : 그래프 DB (bolt://localhost:7687, browser http://localhost:7474)
+#   neo4j-mcp  : Neo4j MCP 서버 (내부 포트 8080, HTTP 모드)
+#   mcpo       : MCP → OpenAPI 브릿지 (외부 디버깅용 http://localhost:8082)
+#   n8n          : 워크플로우 자동화 (http://localhost:5678)
+#   graph-viewer : 정적 그래프 시각화 UI (http://localhost:8087)
+#
+# 실행:
+#   docker compose up -d
+#
+# 중지:
+#   docker compose down
+#
+# 완전 초기화 (볼륨 포함):
+#   docker compose down -v
+# =============================================================================
+
+services:
+
+  # ── Neo4j ──────────────────────────────────────────────────────────────────
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j_ch5
+    platform: linux/arm64
+    ports:
+      - "7474:7474"   # Browser
+      - "7687:7687"   # Bolt
+    environment:
+      - NEO4J_AUTH=${NEO4J_USERNAME}/${NEO4J_PASSWORD}
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+      # 대량 데이터(MITRE ~18k 관계) 적재를 위한 메모리 설정
+      - NEO4J_server_memory_heap_initial__size=512m
+      - NEO4J_server_memory_heap_max__size=2g
+      - NEO4J_server_memory_pagecache_size=512m
+    volumes:
+      - neo4j_data_ch5:/data
+      - neo4j_logs_ch5:/logs
+      - ./neo4j_init.sh:/neo4j_init.sh:ro
+    entrypoint: /neo4j_init.sh
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:7474/"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  # ── Neo4j MCP 서버 ──────────────────────────────────────────────────────────
+  neo4j-mcp:
+    build:
+      context: ../../utils/mcp
+      dockerfile: Dockerfile
+    container_name: neo4j_mcp_ch5
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_TRANSPORT_MODE=http
+      - NEO4J_MCP_HTTP_PORT=8080
+      - NEO4J_MCP_HTTP_HOST=0.0.0.0
+      - NEO4J_LOG_LEVEL=info
+      - NEO4J_SCHEMA_SAMPLE_SIZE=10
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── MCPO (MCP → OpenAPI 브릿지) ────────────────────────────────────────────
+  mcpo:
+    image: ghcr.io/open-webui/mcpo:main
+    container_name: mcpo_ch5
+    command: ["--host", "0.0.0.0", "--port", "8080", "--config", "/app/config.json"]
+    volumes:
+      - ./mcpo_config.json:/app/config.json:ro
+    ports:
+      - "8082:8080"   # 외부 디버깅용: curl http://localhost:8082/neo4j/openapi.json
+    depends_on:
+      - neo4j-mcp
+    restart: unless-stopped
+
+  # ── n8n ────────────────────────────────────────────────────────────────────
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n_ch5
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - N8N_ENCRYPTION_KEY=ch5_practice_key
+      # 대용량 JSON 파일(relationships.json ~5MB) 처리를 위한 설정
+      - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
+      - NODE_OPTIONS=--max-old-space-size=1024
+    volumes:
+      - n8n_data_ch5:/home/node/.n8n
+      # fetch_all.sh 로 생성한 데이터 → n8n 컨테이너 내 /home/node/.n8n-files/
+      - ./data:/home/node/.n8n-files
+    depends_on:
+      - neo4j
+      - mcpo
+    restart: unless-stopped
+
+  # ── Graph Viewer (정적 프론트) ─────────────────────────────────────────────
+  graph-viewer:
+    image: nginx:alpine
+    container_name: graph_viewer_ch5
+    ports:
+      - "8087:80"
+    volumes:
+      - ./graph-viewer:/usr/share/nginx/html:ro
+      - ./graph-viewer/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - n8n
+    restart: unless-stopped
+
+volumes:
+  neo4j_data_ch5:
+  neo4j_logs_ch5:
+  n8n_data_ch5:

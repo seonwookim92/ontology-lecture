@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CH5 Graph Viewer</title>
+    <link rel="stylesheet" href="https://unpkg.com/vis-network/styles/vis-network.min.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="panel panel-left">
+        <div class="panel-header">
+          <p class="eyebrow">CH5 Real Challenge</p>
+          <h1>Visualize Graph</h1>
+          <p class="panel-copy">사건 단위로 지식그래프를 불러오고, 노드를 선택해 세부정보와 인접 엔터티를 확장합니다.</p>
+        </div>
+        <div class="section">
+          <label class="label" for="incident-search">Incident Search</label>
+          <input id="incident-search" class="input" type="text" placeholder="사건명 또는 incident id 검색" />
+          <button id="fetch-incidents" class="button button-primary">Fetch Incidents</button>
+        </div>
+        <div class="section section-fill">
+          <div class="section-heading">
+            <h2>Incidents</h2>
+            <button id="refresh-incidents" class="button button-secondary">새로고침</button>
+          </div>
+          <p class="hint">먼저 <strong>Fetch Incidents</strong>를 눌러 사건 목록을 불러오세요.</p>
+          <div id="incident-list" class="incident-list"></div>
+        </div>
+      </aside>
+      <main class="workspace">
+        <header class="workspace-header">
+          <div>
+            <p class="eyebrow">Interactive Graph</p>
+            <h2 id="selected-incident-title">Incident를 선택하세요</h2>
+          </div>
+          <div class="workspace-actions">
+            <button id="fit-graph" class="button button-secondary">화면 맞춤</button>
+            <button id="reset-graph" class="button button-secondary">초기화</button>
+          </div>
+        </header>
+        <section class="graph-shell">
+          <div id="graph-canvas"></div>
+        </section>
+        <section class="status-bar">
+          <div id="graph-stats" class="stats">노드 0개 · 링크 0개</div>
+          <div id="status-log" class="status-log">시스템 준비 완료.</div>
+        </section>
+      </main>
+      <aside class="panel panel-right">
+        <div class="section">
+          <div class="section-heading">
+            <h2>Node Details</h2>
+          </div>
+          <div id="node-details" class="detail-card muted">그래프에서 노드를 선택하면 세부정보가 표시됩니다.</div>
+        </div>
+        <div class="section">
+          <div class="section-heading">
+            <h2>Expand Neighbors</h2>
+          </div>
+          <div id="expand-controls" class="detail-card muted">확장 가능한 라벨을 확인하려면 노드를 선택하세요.</div>
+        </div>
+      </aside>
+    </div>
+    <script src="https://unpkg.com/vis-data@7.1.9/peer/umd/vis-data.min.js"></script>
+    <script src="https://unpkg.com/vis-network@9.1.9/peer/umd/vis-network.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

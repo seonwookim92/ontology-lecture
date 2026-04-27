@@ -1,0 +1,226 @@
+{
+  "name": "03 Load URLhaus",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1a6327bb-04b4-4c29-9359-94e2d510d3d9",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/urlhaus/indicators.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        0
+      ],
+      "id": "62ec8816-4c6a-4ea7-aa28-95a66efbae1c",
+      "name": "Read URLhaus"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        0
+      ],
+      "id": "4f4eb7a8-bba9-4940-8cfc-fb3b228b87b5",
+      "name": "Parse URLhaus"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        704,
+        0
+      ],
+      "id": "fb388fe1-4379-4af6-9a33-09f97c5f5a38",
+      "name": "Split Out URLhaus"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nfor (const item of $input.all()) {\n  const data = item.json;\n  const records = Array.isArray(data) ? data : [data];\n  for (const record of records) {\n    output.push({ json: record });\n  }\n}\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        0
+      ],
+      "id": "7de73a1b-e244-4c22-a81e-0e8b2215801f",
+      "name": "Normalize URLhaus"
+    },
+    {
+      "parameters": {
+        "batchSize": 100,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1152,
+        0
+      ],
+      "id": "4bf53ab7-ecf7-4f67-811f-6fb0dd622096",
+      "name": "Split URLhaus"
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = s => String(s || '').replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\");\nconst calls = [];\nfor (const item of $input.all()) {\n  const r = item.json;\n  const url = esc(r.value);\n  calls.push(`CALL {\n  MERGE (i:Indicator {value:'${url}'})\n  SET i.indicator_type='${esc(r.indicator_type)}', i.status='${esc(r.status)}',\n      i.threat='${esc(r.threat)}', i.date_added='${esc(r.date_added)}'\n}`);\n  if (r.host && r.host_type) {\n    const hostLabel = r.host_type === 'ip' ? 'IPAddress' : 'Domain';\n    const hostKey = r.host_type === 'ip' ? 'ip' : 'domain';\n    calls.push(`CALL {\n  MATCH (i:Indicator {value:'${url}'})\n  MERGE (h:${hostLabel} {${hostKey}:'${esc(r.host)}'})\n  MERGE (i)-[:HOSTED_ON]->(h)\n}`);\n  }\n  for (const cve of (r.cve_ids || [])) {\n    calls.push(`CALL {\n  MATCH (i:Indicator {value:'${url}'})\n  OPTIONAL MATCH (v:Vulnerability {cve_id:'${esc(cve)}'})\n  WITH i, v\n  WHERE v IS NOT NULL\n  MERGE (i)-[:EXPLOITS]->(v)\n}`);\n  }\n  if (r.malware_name) {\n    calls.push(`CALL {\n  MATCH (i:Indicator {value:'${url}'})\n  MERGE (m:Malware {name:'${esc(r.malware_name)}'})\n  MERGE (i)-[:INDICATES]->(m)\n}`);\n  }\n}\nif (calls.length === 0) return [];\nreturn [{json:{query: calls.join('\\n')}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        96
+      ],
+      "id": "e9707960-cf57-44ef-accc-be5c9db7a6d6",
+      "name": "Build URLhaus Batch Query"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1616,
+        96
+      ],
+      "id": "0d358949-853e-4166-acde-79d4c174d929",
+      "name": "MERGE URLhaus Batch",
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Read URLhaus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read URLhaus": {
+      "main": [
+        [
+          {
+            "node": "Parse URLhaus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse URLhaus": {
+      "main": [
+        [
+          {
+            "node": "Split Out URLhaus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out URLhaus": {
+      "main": [
+        [
+          {
+            "node": "Normalize URLhaus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize URLhaus": {
+      "main": [
+        [
+          {
+            "node": "Split URLhaus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split URLhaus": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Build URLhaus Batch Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build URLhaus Batch Query": {
+      "main": [
+        [
+          {
+            "node": "MERGE URLhaus Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE URLhaus Batch": {
+      "main": [
+        [
+          {
+            "node": "Split URLhaus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "40384c0f-c6df-4671-a1ca-f6b184f2ee02",
+  "meta": {
+    "instanceId": "f962da71cc3c2bf75c6be8a1677d16974c29e5ce29b76687fb9f2f072416354b"
+  },
+  "id": "Xe9FZAfZ2qspVndn",
+  "tags": []
+}

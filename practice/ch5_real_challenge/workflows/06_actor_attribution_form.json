@@ -1,0 +1,616 @@
+{
+  "name": "06 Actor Attribution Form",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Cyber Correlation Analysis",
+        "formDescription": "현재 진행 중인 사건에 대한 확보된 단서를 기입하면 구축된 지식그래프를 바탕으로 유력한 배후 Threat Actor를 추정합니다.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "IPAddress",
+              "fieldName": "ipAddress",
+              "placeholder": "예: 101.35.56.7, 8.8.8.8"
+            },
+            {
+              "fieldLabel": "Domain",
+              "fieldName": "domain",
+              "placeholder": "예: example.com, c2.example.org"
+            },
+            {
+              "fieldLabel": "Indicator",
+              "fieldName": "indicator",
+              "placeholder": "예: http://1.1.1.1/scr.zip, scr.zip, invoice.lnk"
+            },
+            {
+              "fieldLabel": "Malware",
+              "fieldName": "malware",
+              "placeholder": "예: Amadey, TrickBot"
+            },
+            {
+              "fieldLabel": "Vulnerability",
+              "fieldName": "vulnerability",
+              "placeholder": "예: CVE-2025-11371, CVE-2025-21739"
+            },
+            {
+              "fieldLabel": "Victim",
+              "fieldName": "victim",
+              "placeholder": "예: ACME Corp"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "분석 실행",
+          "path": "fb2388d3-ad56-48f5-8685-dadd4d0acc9e",
+          "ignoreBots": true
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        2592,
+        880
+      ],
+      "id": "86d81870-0643-4ea8-b85e-b71864986db8",
+      "name": "On form submission",
+      "webhookId": "fb2388d3-ad56-48f5-8685-dadd4d0acc9e"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/get-schema",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"properties\": {}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2816,
+        1040
+      ],
+      "id": "2e0a904e-b272-4700-babb-519805a4823c",
+      "name": "Get Schema"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "schema",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        3040,
+        1040
+      ],
+      "id": "3197e878-6ebe-45a5-8db3-6546979f6ddb",
+      "name": "Aggregate Schema"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3264,
+        896
+      ],
+      "id": "8e30b744-7123-427d-9405-fb7a49ddd85b",
+      "name": "Merge Form and Schema"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        3472,
+        896
+      ],
+      "id": "9b35e670-4556-4ddf-88ba-97fa5ff6f653",
+      "name": "Aggregate Context"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aaf57e6d-2dff-4439-abab-d50cae9b6414",
+              "name": "ipAddress",
+              "value": "={{ $json.data[0].ipAddress }}",
+              "type": "string"
+            },
+            {
+              "id": "1c24dbf2-cf31-4f35-960d-35feaf653a38",
+              "name": "domain",
+              "value": "={{ $json.data[0].domain }}",
+              "type": "string"
+            },
+            {
+              "id": "6cfb6e5b-a067-43c4-93f2-8f6c0f6c6d43",
+              "name": "indicator",
+              "value": "={{ $json.data[0].indicator }}",
+              "type": "string"
+            },
+            {
+              "id": "16ba0d39-20f5-4abd-adc4-f64ca1f4c673",
+              "name": "malware",
+              "value": "={{ $json.data[0].malware }}",
+              "type": "string"
+            },
+            {
+              "id": "9a98d02a-cae0-4322-9984-1f7489d4c4a3",
+              "name": "vulnerability",
+              "value": "={{ $json.data[0].vulnerability }}",
+              "type": "string"
+            },
+            {
+              "id": "4530f429-d9fa-4d90-ae40-d75d0637e626",
+              "name": "victim",
+              "value": "={{ $json.data[0].victim }}",
+              "type": "string"
+            },
+            {
+              "id": "9843991f-7b83-478b-a83d-6755b1f7cf4b",
+              "name": "schema",
+              "value": "={{ $json.data[1].schema }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3696,
+        896
+      ],
+      "id": "50988d6e-eea4-42f5-9e00-d2e678680341",
+      "name": "Set Context"
+    },
+    {
+      "parameters": {
+        "jsCode": "const toList = (value) => String(value || '')\n  .split(/\\r?\\n|,/)\n  .map((v) => v.trim())\n  .filter(Boolean);\n\nconst unique = (values) => [...new Set(values)];\nconst clues = [];\nconst pushClues = (type, values) => {\n  for (const value of unique(values)) clues.push({ type, value });\n};\n\nconst ipAddressList = unique(toList($json.ipAddress));\nconst domainList = unique(toList($json.domain));\nconst indicatorList = unique(toList($json.indicator));\nconst malwareList = unique(toList($json.malware));\nconst vulnerabilityList = unique(toList($json.vulnerability).map((v) => v.toUpperCase()));\nconst victimList = unique(toList($json.victim));\n\npushClues('IPAddress', ipAddressList);\npushClues('Domain', domainList);\npushClues('Indicator', indicatorList);\npushClues('Malware', malwareList);\npushClues('Vulnerability', vulnerabilityList);\npushClues('Victim', victimList);\n\nconst clueSummary = clues.length\n  ? clues.map((c) => `${c.type}: ${c.value}`).join(' | ')\n  : '입력된 단서 없음';\n\nreturn [{\n  json: {\n    ...$json,\n    ipAddressList,\n    domainList,\n    indicatorList,\n    malwareList,\n    vulnerabilityList,\n    victimList,\n    clues,\n    clueCount: clues.length,\n    clueSummary,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3920,
+        896
+      ],
+      "id": "932dd669-c86b-4752-a2fc-ff69f818b36d",
+      "name": "Normalize Clues"
+    },
+    {
+      "parameters": {
+        "jsCode": "const esc = (s) => String(s || '').replace(/\\\\/g, '\\\\\\\\').replace(/'/g, \"\\\\'\");\nconst blocks = [];\nconst add = (query) => blocks.push(query.trim());\n\nfor (const value of ($json.ipAddressList || [])) {\n  const v = esc(value);\n  add(`MATCH (ip:IPAddress {ip:'${v}'})<-[:HOSTED_ON]-(ind:Indicator)<-[:INVOLVES_INDICATOR]-(inc:Incident)-[:ATTRIBUTED_TO]->(ta:ThreatActor)\nRETURN ta.name AS actor, 'IPAddress' AS clue_type, '${v}' AS clue_value, 1 AS dist,\n       '${v}' AS input_hit, ind.value AS shared_clue, inc.incident_id AS incident_id,\n       'IP -> Indicator -> Incident -> ThreatActor' AS reasoning_path`);\n  add(`MATCH (ip:IPAddress {ip:'${v}'})<-[:HOSTED_ON]-(ind:Indicator)-[:INDICATES]->(m:Malware)<-[:USES_MALWARE]-(ta:ThreatActor)\nRETURN ta.name AS actor, 'IPAddress' AS clue_type, '${v}' AS clue_value, 2 AS dist,\n       '${v}' AS input_hit, m.name AS shared_clue, '' AS incident_id,\n       'IP -> Indicator -> Malware -> ThreatActor' AS reasoning_path`);\n}\n\nfor (const value of ($json.domainList || [])) {\n  const v = esc(value);\n  add(`MATCH (d:Domain {domain:'${v}'})<-[:HOSTED_ON]-(ind:Indicator)<-[:INVOLVES_INDICATOR]-(inc:Incident)-[:ATTRIBUTED_TO]->(ta:ThreatActor)\nRETURN ta.name AS actor, 'Domain' AS clue_type, '${v}' AS clue_value, 1 AS dist,\n       '${v}' AS input_hit, ind.value AS shared_clue, inc.incident_id AS incident_id,\n       'Domain -> Indicator -> Incident -> ThreatActor' AS reasoning_path`);\n  add(`MATCH (d:Domain {domain:'${v}'})<-[:HOSTED_ON]-(ind:Indicator)-[:INDICATES]->(m:Malware)<-[:USES_MALWARE]-(ta:ThreatActor)\nRETURN ta.name AS actor, 'Domain' AS clue_type, '${v}' AS clue_value, 2 AS dist,\n       '${v}' AS input_hit, m.name AS shared_clue, '' AS incident_id,\n       'Domain -> Indicator -> Malware -> ThreatActor' AS reasoning_path`);\n}\n\nfor (const value of ($json.indicatorList || [])) {\n  const v = esc(value);\n  add(`MATCH (ind:Indicator)\nWHERE toLower(ind.value) = toLower('${v}') OR toLower(ind.value) CONTAINS toLower('${v}')\nMATCH (inc:Incident)-[:INVOLVES_INDICATOR]->(ind)-[:HOSTED_ON]->(host)\nMATCH (inc)-[:ATTRIBUTED_TO]->(ta:ThreatActor)\nRETURN ta.name AS actor, 'Indicator' AS clue_type, '${v}' AS clue_value, 1 AS dist,\n       '${v}' AS input_hit, coalesce(host.ip, host.domain, ind.value) AS shared_clue, inc.incident_id AS incident_id,\n       'Indicator -> Incident -> ThreatActor' AS reasoning_path`);\n  add(`MATCH (ind:Indicator)\nWHERE toLower(ind.value) = toLower('${v}') OR toLower(ind.value) CONTAINS toLower('${v}')\nMATCH (ind)-[:INDICATES]->(m:Malware)<-[:USES_MALWARE]-(ta:ThreatActor)\nRETURN ta.name AS actor, 'Indicator' AS clue_type, '${v}' AS clue_value, 1 AS dist,\n       '${v}' AS input_hit, m.name AS shared_clue, '' AS incident_id,\n       'Indicator -> Malware -> ThreatActor' AS reasoning_path`);\n  add(`MATCH (ind:Indicator)\nWHERE toLower(ind.value) = toLower('${v}') OR toLower(ind.value) CONTAINS toLower('${v}')\nMATCH (ind)-[:EXPLOITS]->(vul:Vulnerability)<-[:EXPLOITED]-(inc:Incident)-[:ATTRIBUTED_TO]->(ta:ThreatActor)\nRETURN ta.name AS actor, 'Indicator' AS clue_type, '${v}' AS clue_value, 2 AS dist,\n       '${v}' AS input_hit, vul.cve_id AS shared_clue, inc.incident_id AS incident_id,\n       'Indicator -> Vulnerability -> Incident -> ThreatActor' AS reasoning_path`);\n}\n\nfor (const value of ($json.malwareList || [])) {\n  const v = esc(value);\n  add(`MATCH (m:Malware)\nWHERE toLower(m.name) = toLower('${v}') OR toLower(m.name) CONTAINS toLower('${v}')\nMATCH (inc:Incident)-[:INVOLVES_MALWARE]->(m)\nMATCH (inc)-[:ATTRIBUTED_TO]->(ta:ThreatActor)\nRETURN ta.name AS actor, 'Malware' AS clue_type, '${v}' AS clue_value, 1 AS dist,\n       '${v}' AS input_hit, m.name AS shared_clue, inc.incident_id AS incident_id,\n       'Malware -> Incident -> ThreatActor' AS reasoning_path`);\n  add(`MATCH (ta:ThreatActor)-[:USES_MALWARE]->(m:Malware)\nWHERE toLower(m.name) = toLower('${v}') OR toLower(m.name) CONTAINS toLower('${v}')\nRETURN ta.name AS actor, 'Malware' AS clue_type, '${v}' AS clue_value, 1 AS dist,\n       '${v}' AS input_hit, m.name AS shared_clue, '' AS incident_id,\n       'Malware -> ThreatActor' AS reasoning_path`);\n}\n\nfor (const value of ($json.vulnerabilityList || [])) {\n  const v = esc(value);\n  add(`MATCH (vul:Vulnerability {cve_id:'${v}'})<-[:EXPLOITED]-(inc:Incident)-[:ATTRIBUTED_TO]->(ta:ThreatActor)\nRETURN ta.name AS actor, 'Vulnerability' AS clue_type, '${v}' AS clue_value, 1 AS dist,\n       '${v}' AS input_hit, vul.cve_id AS shared_clue, inc.incident_id AS incident_id,\n       'Vulnerability -> Incident -> ThreatActor' AS reasoning_path`);\n  add(`MATCH (vul:Vulnerability {cve_id:'${v}'})<-[:EXPLOITS]-(ind:Indicator)-[:INDICATES]->(m:Malware)<-[:USES_MALWARE]-(ta:ThreatActor)\nRETURN ta.name AS actor, 'Vulnerability' AS clue_type, '${v}' AS clue_value, 2 AS dist,\n       '${v}' AS input_hit, m.name AS shared_clue, '' AS incident_id,\n       'Vulnerability -> Indicator -> Malware -> ThreatActor' AS reasoning_path`);\n}\n\nfor (const value of ($json.victimList || [])) {\n  const v = esc(value);\n  add(`MATCH (vic:Victim) WHERE toLower(vic.org_name) = toLower('${v}') OR toLower(vic.org_name) CONTAINS toLower('${v}')\nMATCH (inc:Incident)-[:TARGETED]->(vic)\nMATCH (inc)-[:ATTRIBUTED_TO]->(ta:ThreatActor)\nRETURN ta.name AS actor, 'Victim' AS clue_type, '${v}' AS clue_value, 1 AS dist,\n       '${v}' AS input_hit, vic.org_name AS shared_clue, inc.incident_id AS incident_id,\n       'Victim -> Incident -> ThreatActor' AS reasoning_path`);\n}\n\nconst fallback = \"RETURN '' AS actor, '' AS clue_type, '' AS clue_value, 99 AS dist, '' AS input_hit, '' AS shared_clue, '' AS incident_id, 'No match' AS reasoning_path\";\nreturn [{ json: { ...$json, query: blocks.length ? blocks.join('\\nUNION ALL\\n') : fallback } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4144,
+        896
+      ],
+      "id": "5270932b-85ad-42b4-a2ff-7300d9a759aa",
+      "name": "Build Correlation Query"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/read-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4352,
+        896
+      ],
+      "id": "f990b863-094d-4bfa-86d4-5a73460ba58e",
+      "name": "Read Correlation Query",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4576,
+        896
+      ],
+      "id": "0f7c1ab6-825f-4685-89e7-c49d8c385aa1",
+      "name": "Merge Query and Results"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        4800,
+        896
+      ],
+      "id": "07f19423-f9b0-4017-adca-bb637cd24301",
+      "name": "Aggregate Query Results"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $json || {};\nconst data = Array.isArray(input.data) ? input.data : [];\n\n// 1) 첫 번째 객체는 request/context\nconst request = data[0] || {};\n\n// 2) data[1]부터가 실제 Cypher row들인 구조 처리\nlet rows = [];\n\nif (data.length > 1 && data[1]?.actor) {\n  rows = data.slice(1);\n} else {\n  const response = data[1] || input.response || input.result || {};\n\n  if (Array.isArray(response)) rows = response;\n  else if (Array.isArray(response.data)) rows = response.data;\n  else if (Array.isArray(response.results)) rows = response.results;\n  else if (Array.isArray(response.records)) rows = response.records;\n  else if (Array.isArray(response.rows)) rows = response.rows;\n}\n\n// 3) 혹시 read-cypher 결과가 { json: { ... } } 형태로 감싸진 경우 보정\nrows = rows.map((row) => row.json || row).filter(Boolean);\n\n// 4) actor가 있는 row만 사용\nrows = rows.filter((row) => String(row.actor || '').trim());\n\nconst grouped = new Map();\n\nfor (const row of rows) {\n  const actor = String(row.actor || '').trim();\n  if (!actor) continue;\n\n  if (!grouped.has(actor)) {\n    grouped.set(actor, {\n      actor,\n      minDist: 999,\n      inputHits: new Set(),\n      sharedClues: new Set(),\n      incidents: new Set(),\n      reasoningPaths: [],\n      clueTypes: new Set(),\n    });\n  }\n\n  const entry = grouped.get(actor);\n\n  entry.minDist = Math.min(entry.minDist, Number(row.dist || 99));\n\n  if (row.input_hit) entry.inputHits.add(String(row.input_hit));\n  if (row.shared_clue) entry.sharedClues.add(String(row.shared_clue));\n  if (row.incident_id) entry.incidents.add(String(row.incident_id));\n\n  if (row.reasoning_path && entry.reasoningPaths.length < 8) {\n    entry.reasoningPaths.push(String(row.reasoning_path));\n  }\n\n  if (row.clue_type) entry.clueTypes.add(String(row.clue_type));\n}\n\nconst clueCount = Number(request.clueCount || request.clues?.length || 0);\n\nconst allFindings = [...grouped.values()].map((entry) => {\n  const proximityScore = 1 / (1 + entry.minDist);\n  const breadthScore = clueCount > 0 ? entry.inputHits.size / clueCount : 0;\n  const overlapScore = Math.min(1, entry.sharedClues.size / 10);\n\n  let finalScore =\n    proximityScore * 0.2 +\n    breadthScore * 0.6 +\n    overlapScore * 0.2;\n\n  if (entry.incidents.size > 0) finalScore *= 1.15;\n\n  const percent = Math.min(Math.round(finalScore * 1000) / 10, 100);\n\n  return {\n    actor: entry.actor,\n    score: Math.round(finalScore * 1000) / 1000,\n    percent,\n    matchedClueCount: entry.inputHits.size,\n    inputHits: [...entry.inputHits],\n    sharedClues: [...entry.sharedClues].slice(0, 10),\n    incidents: [...entry.incidents].slice(0, 8),\n    reasoningPaths: [...new Set(entry.reasoningPaths)].slice(0, 6),\n    clueTypes: [...entry.clueTypes],\n    minDist: entry.minDist,\n  };\n}).sort((a, b) => b.score - a.score).slice(0, 15);\n\nconst toConfidence = (percent) => {\n  if (percent >= 70) return '높음';\n  if (percent >= 40) return '보통';\n  if (percent > 0) return '낮음';\n  return '판단 불가';\n};\n\nfor (const finding of allFindings) {\n  finding.confidence = toConfidence(finding.percent);\n}\n\nconst topActors = allFindings.slice(0, 5);\nconst top = topActors[0] || null;\n\nconst evidenceSummaryForAi = topActors.map((f) => ({\n  ThreatActor: f.actor,\n  Confidence: `${f.percent}%`,\n  MatchedArtifacts: f.inputHits,\n  SharedClues: f.sharedClues,\n  ReasoningPaths: f.reasoningPaths,\n  IncidentLinks: f.incidents,\n}));\n\nconst llmPrompt = [\n  '[Task]',\n  '제공된 단서와 지식 그래프 분석 결과를 토대로 위협 인텔리전스 보고서를 작성하세요.',\n  '',\n  '[Context]',\n  `입력된 단서: ${request.clueSummary || '없음'}`,\n  `전체 단서 수: ${clueCount}`,\n  '',\n  '[Matched Entities]',\n  JSON.stringify(evidenceSummaryForAi, null, 2),\n  '',\n  '[Requirements]',\n  '1. 한국어로 작성',\n  '2. HTML fragment만 반환',\n  '3. <section>, <h2>, <h3>, <p>, <ul>, <li>, <strong>, <code>만 사용',\n  '4. 가장 가능성이 높은 Threat Actor와 이유를 결론 우선으로 작성',\n  '5. Confidence 수치와 MatchedArtifacts, SharedClues, ReasoningPaths를 직접 인용',\n  '6. 근거가 약한 경우 불확실성과 추가 확보가 필요한 단서를 명시',\n].join('\\n');\n\nreturn [{\n  json: {\n    llmPrompt: llmPrompt,\n    clueSummary: request.clueSummary,\n    clueCount,\n    clues: request.clues,\n    schema: request.schema,\n    cypherQuery: request.query || request.cypherQuery,\n    rawRows: rows,\n    topActors,\n    topConfidence: top ? top.confidence : '판단 불가',\n    evidenceSummaryForAi,\n\n    // 문자열 버전 추가\n    cluesText: JSON.stringify(request.clues, null, 2),\n    schemaText: typeof request.schema === 'string'\n      ? request.schema\n      : JSON.stringify(request.schema, null, 2),\n\n    rawRowsText: JSON.stringify(rows.slice(0, 200), null, 2),\n    topActorsText: JSON.stringify(topActors, null, 2),\n    evidenceSummaryText: JSON.stringify(evidenceSummaryForAi, null, 2),\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5024,
+        896
+      ],
+      "id": "bae4b625-fc85-425e-9707-65df8263ba6e",
+      "name": "Score Actors"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.llmPrompt }}",
+        "options": {
+          "systemMessage": "=You are a Cyber Threat Correlation Analyst.\n\nYour role is to analyze the evidence already provided in the conversation and produce a concise, evidence-based attribution assessment.\n\nThe upstream workflow has already supplied the relevant clues, rankings, and graph-correlation context.  \nDo not repeat input data.  \nDo not explain the workflow.  \nFocus only on interpretation, prioritization, uncertainty analysis, and final reporting.\n\n==================================================\n[PRIMARY OBJECTIVE]\n==================================================\n\nDetermine the most likely ThreatActor(s) behind the observed activity based on the supplied evidence.\n\nYour job is to answer:\n\n- Which actor is currently the strongest candidate?\n- Why does that actor rank highest?\n- What evidence is direct vs indirect?\n- How reliable is the attribution?\n- What additional evidence would strengthen confidence?\n\n==================================================\n[TOOL USAGE POLICY]\n==================================================\n\nDefault behavior: do NOT use read-cypher.\n\nUse read-cypher only when clearly necessary, such as:\n\n1. Supplied evidence is missing or empty\n2. Multiple top candidates are tied and require tie-break analysis\n3. The user explicitly requests deeper graph investigation\n4. One specific relationship needs confirmation\n\nIf used:\n\n- Use narrow Cypher queries only\n- Use LIMIT\n- Avoid broad scans\n- Use tool output as supporting evidence only\n\n==================================================\n[ANALYSIS RULES]\n==================================================\n\n1. Never invent ThreatActor names, incidents, malware, CVEs, or relationships.\n2. Use only supplied evidence and optional tool results.\n3. Multiple independent clue types outweigh repeated single-clue matches.\n4. Shared IP/domain alone is weak evidence.\n5. Malware + infrastructure + historical incident overlap is stronger evidence.\n6. Distinguish direct evidence from indirect evidence.\n7. If evidence is weak, explicitly say so.\n8. Consider alternative explanations:\n   - shared hosting\n   - reused infrastructure\n   - commodity malware\n   - false flag\n   - noisy or synthetic data\n9. Never state certainty unless evidence is overwhelming.\n\n==================================================\n[CONFIDENCE GUIDE]\n==================================================\n\n높음:\n- 여러 단서 유형이 동일 actor로 수렴\n- 과거 attributed incident와 직접 연결\n- malware + IOC + incident correlation 존재\n\n보통:\n- 일부 강한 단서 존재\n- malware 또는 TTP 일치\n- 후보 중 상대적 우세\n\n낮음:\n- 단일 단서 중심\n- 공유 인프라 위주\n- 다수 후보가 유사\n\n판단 불가:\n- 근거 부족\n- 결과 없음\n- 노이즈 과다\n\n==================================================\n[OUTPUT REQUIREMENTS]\n==================================================\n\nReturn HTML fragment only.\n\nAllowed tags:\n<section>, <h2>, <h3>, <p>, <ul>, <li>, <strong>, <code>\n\nDo not use:\n<html>, <head>, <body>, <style>, <script>, markdown\n\n==================================================\n[OUTPUT STRUCTURE]\n==================================================\n\n<section>\n  <h2>결론</h2>\n  <p><strong>가장 가능성이 높은 공격 배후:</strong> ...</p>\n  <p><strong>신뢰도:</strong> 높음 / 보통 / 낮음 / 판단 불가</p>\n</section>\n\n<section>\n  <h2>상위 후보</h2>\n\n  <h3>1. ...</h3>\n  <ul>\n    <li><strong>근거:</strong> ...</li>\n    <li><strong>주요 단서:</strong> ...</li>\n    <li><strong>한계:</strong> ...</li>\n  </ul>\n\n  <h3>2. ...</h3>\n  <ul>\n    <li><strong>근거:</strong> ...</li>\n    <li><strong>주요 단서:</strong> ...</li>\n    <li><strong>한계:</strong> ...</li>\n  </ul>\n</section>\n\n<section>\n  <h2>핵심 평가</h2>\n  <ul>\n    <li>직접 근거와 간접 근거 구분</li>\n    <li>IOC / 인프라 재사용 가능성</li>\n    <li>Malware / CVE / Technique 연계성</li>\n    <li>대안 가설 존재 여부</li>\n  </ul>\n</section>\n\n<section>\n  <h2>추가 권고</h2>\n  <p>추가 로그, IOC, 피해 대상, 시간대 정보가 확보되면 판단 정확도가 향상될 수 있습니다.</p>\n</section>\n\n==================================================\n[STYLE]\n==================================================\n\n- 한국어 작성\n- 결론 우선\n- 짧고 전문적으로\n- 과장 금지\n- “확정” 표현 금지\n- “가능성이 높다 / 보통 / 낮음 / 판단 불가” 사용\n- 이미 제공된 evidence 수치와 후보 순위를 자연스럽게 활용"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        5232,
+        896
+      ],
+      "id": "253cca0d-529a-4310-b364-0e2bfeb29e35",
+      "name": "AI Analyst"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "qwen3.5-35b",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        5232,
+        1120
+      ],
+      "id": "a735b203-c99a-451f-9156-504707f37c79",
+      "name": "vLLM Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "N4VmTPN3b2gCeXIb",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5680,
+        672
+      ],
+      "id": "be2a0e91-d358-4cff-94b7-32c6da5f85cb",
+      "name": "Merge Ranked Data and Report"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        5680,
+        896
+      ],
+      "id": "e84dcfbb-4838-4a30-8897-5bdaa8b87535",
+      "name": "Aggregate Final Context"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ranked = $json.data[0] || {};\nconst reportNode = $json.data[1] || {};\nconst aiHtml = String(reportNode.output || reportNode.text || '').trim();\n\nconst escapeHtml = (value) => String(value || '')\n  .replace(/&/g, '&amp;')\n  .replace(/</g, '&lt;')\n  .replace(/>/g, '&gt;')\n  .replace(/\\\"/g, '&quot;')\n  .replace(/'/g, '&#39;');\n\nconst topActors = ranked.topActors || [];\nconst top = topActors[0] || null;\n\nconst baseTextStyle = `\n  box-sizing:border-box;\n  max-width:100%;\n  min-width:0;\n  overflow-wrap:anywhere;\n  word-break:break-word;\n`;\n\nconst pageStyle = `\n  font-family:Arial,sans-serif;\n  width:100%;\n  max-width:100%;\n  margin:0;\n  padding:32px;\n  background:#f1f5f9;\n  color:#0f172a;\n  line-height:1.65;\n  box-sizing:border-box;\n  overflow-x:hidden;\n  overflow-wrap:anywhere;\n  word-break:break-word;\n`;\n\nconst containerStyle = `\n  width:100%;\n  max-width:1280px;\n  margin:0 auto;\n  box-sizing:border-box;\n  min-width:0;\n`;\n\nconst cardStyle = `\n  ${baseTextStyle}\n  border:1px solid #dbe4f0;\n  border-radius:24px;\n  background:#ffffff;\n  padding:28px;\n  box-shadow:0 10px 30px rgba(15,23,42,0.06);\n`;\n\nconst miniCardStyle = `\n  ${baseTextStyle}\n  padding:18px;\n  border-radius:18px;\n  background:#f8fafc;\n  border:1px solid #e2e8f0;\n`;\n\nconst codeStyle = `\n  display:inline-block;\n  max-width:100%;\n  white-space:normal;\n  overflow-wrap:anywhere;\n  word-break:break-word;\n  background:#e2e8f0;\n  color:#0f172a;\n  padding:2px 6px;\n  border-radius:6px;\n  margin:2px;\n  font-size:12px;\n`;\n\nconst clueBadges = (ranked.clues || []).map((clue) => `\n  <span style=\"\n    display:inline-flex;\n    align-items:center;\n    max-width:100%;\n    padding:6px 10px;\n    border-radius:999px;\n    background:#e2e8f0;\n    color:#0f172a;\n    font-size:12px;\n    font-weight:600;\n    overflow-wrap:anywhere;\n    word-break:break-word;\n    box-sizing:border-box;\n  \">\n    ${escapeHtml(clue.type)}: ${escapeHtml(clue.value)}\n  </span>\n`).join('');\n\nconst rankingHtml = topActors.length ? topActors.map((actor, index) => {\n  const incidents = actor.incidents?.length\n    ? actor.incidents.map((v) => `<code style=\"${codeStyle}\">${escapeHtml(v)}</code>`).join(' ')\n    : '없음';\n\n  const matched = actor.inputHits?.length\n    ? actor.inputHits.map((v) => `<li>${escapeHtml(v)}</li>`).join('')\n    : '<li>직접 일치 없음</li>';\n\n  const shared = actor.sharedClues?.length\n    ? actor.sharedClues.map((v) => `<li>${escapeHtml(v)}</li>`).join('')\n    : '<li>공유 중간 단서 없음</li>';\n\n  const paths = actor.reasoningPaths?.length\n    ? actor.reasoningPaths.map((v) => `<li>${escapeHtml(v)}</li>`).join('')\n    : '<li>경로 정보 없음</li>';\n\n  return `\n  <article style=\"${cardStyle}\">\n    <div style=\"display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;min-width:0;\">\n      <div style=\"${baseTextStyle}\">\n        <p style=\"margin:0 0 8px 0;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;\">\n          Candidate ${index + 1}\n        </p>\n        <h3 style=\"margin:0;font-size:clamp(22px,3vw,28px);line-height:1.2;color:#0f172a;\">\n          ${escapeHtml(actor.actor)}\n        </h3>\n      </div>\n\n      <div style=\"\n        ${baseTextStyle}\n        flex:1 1 220px;\n        max-width:320px;\n        padding:16px 18px;\n        border-radius:18px;\n        background:#eff6ff;\n        border:1px solid #bfdbfe;\n      \">\n        <p style=\"margin:0 0 6px 0;\"><strong>Confidence</strong> ${escapeHtml(actor.confidence)} (${actor.percent || 0}%)</p>\n        <p style=\"margin:0 0 6px 0;\"><strong>Score</strong> ${actor.score || 0}</p>\n        <p style=\"margin:0;\"><strong>Min Distance</strong> ${actor.minDist || '-'}</p>\n      </div>\n    </div>\n\n    <div style=\"\n      display:grid;\n      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));\n      gap:16px;\n      margin-top:20px;\n      min-width:0;\n      max-width:100%;\n    \">\n      <section style=\"${miniCardStyle}\">\n        <h4 style=\"margin:0 0 12px 0;color:#0f172a;\">Matched Artifacts</h4>\n        <ul style=\"margin:0;padding-left:18px;\">${matched}</ul>\n      </section>\n\n      <section style=\"${miniCardStyle}\">\n        <h4 style=\"margin:0 0 12px 0;color:#0f172a;\">Shared Clues</h4>\n        <ul style=\"margin:0;padding-left:18px;\">${shared}</ul>\n      </section>\n\n      <section style=\"${miniCardStyle}\">\n        <h4 style=\"margin:0 0 12px 0;color:#0f172a;\">Related Incidents</h4>\n        <p style=\"margin:0;\">${incidents}</p>\n      </section>\n    </div>\n\n    <section style=\"\n      ${baseTextStyle}\n      margin-top:18px;\n      padding:18px;\n      border-radius:18px;\n      background:#fffdf7;\n      border:1px solid #f5e7a1;\n    \">\n      <h4 style=\"margin:0 0 12px 0;color:#0f172a;\">Reasoning Paths</h4>\n      <ul style=\"margin:0;padding-left:18px;\">${paths}</ul>\n    </section>\n  </article>`;\n}).join('') : `\n<section style=\"${cardStyle}\">\n  <h3 style=\"margin-top:0;\">후보 없음</h3>\n  <p style=\"margin-bottom:0;\">입력 단서와 과거 지식그래프 사이에서 유의미한 Threat Actor 연결을 찾지 못했습니다.</p>\n</section>`;\n\nconst executiveHtml = top ? `\n<section style=\"\n  ${baseTextStyle}\n  padding:32px;\n  border-radius:28px;\n  background:linear-gradient(135deg,#0f172a,#1e3a8a);\n  color:#f8fafc;\n  box-shadow:0 18px 50px rgba(15,23,42,0.28);\n\">\n  <p style=\"margin:0 0 12px 0;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#bfdbfe;\">\n    Executive Assessment\n  </p>\n  <h2 style=\"margin:0 0 12px 0;font-size:clamp(30px,5vw,42px);line-height:1.1;color:#ffffff;\">\n    ${escapeHtml(top.actor)}\n  </h2>\n  <p style=\"margin:0 0 8px 0;font-size:18px;\">\n    <strong>신뢰도</strong> ${escapeHtml(ranked.topConfidence || top.confidence)}\n    / <strong>점수</strong> ${top.score || 0}\n    / <strong>커버리지</strong> ${top.matchedClueCount || 0}개 단서\n  </p>\n  <p style=\"margin:0;font-size:15px;color:#dbeafe;\">\n    입력 단서와 과거 Incident, Malware, Vulnerability, Indicator 연결을 종합한 결과 가장 높은 상관성을 보인 후보입니다.\n  </p>\n</section>` : `\n<section style=\"\n  ${baseTextStyle}\n  padding:32px;\n  border-radius:28px;\n  background:#111827;\n  color:#f9fafb;\n\">\n  <h2 style=\"margin:0 0 12px 0;\">Threat Actor 추정 불가</h2>\n  <p style=\"margin:0;\">현재 저장된 과거 Incident/Indicator/Malware/Vulnerability 연결만으로는 우세한 후보를 도출하지 못했습니다.</p>\n</section>`;\n\nconst analysisBlock = aiHtml || `\n<section>\n  <h2>분석 요약</h2>\n  <p>LLM 분석 결과를 생성하지 못해 점수 기반 랭킹만 표시합니다.</p>\n</section>`;\n\nconst queryBlock = `\n<details style=\"\n  ${baseTextStyle}\n  margin-top:24px;\n  border:1px solid #cbd5e1;\n  border-radius:18px;\n  background:#ffffff;\n  padding:18px;\n\">\n  <summary style=\"cursor:pointer;color:#1d4ed8;font-weight:700;\">Used Cypher</summary>\n  <pre style=\"\n    white-space:pre-wrap;\n    word-break:break-word;\n    overflow-wrap:anywhere;\n    background:#0f172a;\n    color:#e2e8f0;\n    padding:18px;\n    border-radius:14px;\n    overflow:auto;\n    font-size:12px;\n    line-height:1.6;\n    max-width:100%;\n    box-sizing:border-box;\n  \">${escapeHtml(ranked.cypherQuery || '')}</pre>\n</details>`;\n\nconst completionHtml = `\n<div style=\"${pageStyle}\">\n  <div style=\"${containerStyle}\">\n    <header style=\"margin-bottom:28px;${baseTextStyle}\">\n      <p style=\"margin:0 0 10px 0;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;\">\n        Correlation Analysis Report\n      </p>\n\n      <h1 style=\"margin:0 0 12px 0;font-size:clamp(32px,6vw,52px);line-height:1.05;\">\n        Threat Actor Attribution\n      </h1>\n\n      <p style=\"margin:0 0 16px 0;font-size:16px;color:#475569;\">\n        입력된 사건 단서를 과거 지식그래프와 대조해 배후 Threat Actor 가능성을 평가한 결과입니다.\n      </p>\n\n      <div style=\"display:flex;flex-wrap:wrap;gap:10px;min-width:0;max-width:100%;\">\n        ${clueBadges || '<span style=\"font-size:14px;color:#64748b;\">입력 단서 없음</span>'}\n      </div>\n    </header>\n\n    ${executiveHtml}\n\n    <section style=\"\n      ${cardStyle}\n      margin-top:28px;\n    \">\n      ${analysisBlock}\n    </section>\n\n    <section style=\"\n      margin-top:28px;\n      display:grid;\n      gap:22px;\n      min-width:0;\n      max-width:100%;\n    \">\n      ${rankingHtml}\n    </section>\n\n    ${queryBlock}\n  </div>\n</div>`;\n\nreturn [\n  {\n    json: {\n      resultTitle: top ? `유력 Threat Actor: ${top.actor}` : 'Threat Actor 추정 결과',\n      completionHtml\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5904,
+        896
+      ],
+      "id": "57131fd3-576d-4771-adfc-7863b23b05d8",
+      "name": "Build Completion Page"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "={{ $json.resultTitle }}",
+        "completionMessage": "={{ $json.completionHtml }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [
+        6112,
+        896
+      ],
+      "id": "36733814-fbf3-4380-9668-d749cebc2f8f",
+      "name": "Show Result",
+      "webhookId": "8df71e7c-e4fa-4b77-8caa-a9ad2125f422"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Execute a read-only Cypher query on the Neo4j security knowledge graph",
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/read-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        5456,
+        1120
+      ],
+      "id": "2fb76017-1deb-458c-949e-0b9502bb05e2",
+      "name": "read-cypher"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Get Schema",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Form and Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Schema": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Schema": {
+      "main": [
+        [
+          {
+            "node": "Merge Form and Schema",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Form and Schema": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Context": {
+      "main": [
+        [
+          {
+            "node": "Set Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Context": {
+      "main": [
+        [
+          {
+            "node": "Normalize Clues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Clues": {
+      "main": [
+        [
+          {
+            "node": "Build Correlation Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Correlation Query": {
+      "main": [
+        [
+          {
+            "node": "Read Correlation Query",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Query and Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Correlation Query": {
+      "main": [
+        [
+          {
+            "node": "Merge Query and Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Query and Results": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Query Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Query Results": {
+      "main": [
+        [
+          {
+            "node": "Score Actors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Actors": {
+      "main": [
+        [
+          {
+            "node": "AI Analyst",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Ranked Data and Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Analyst": {
+      "main": [
+        [
+          {
+            "node": "Merge Ranked Data and Report",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Ranked Data and Report": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Final Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Final Context": {
+      "main": [
+        [
+          {
+            "node": "Build Completion Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Completion Page": {
+      "main": [
+        [
+          {
+            "node": "Show Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "vLLM Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Analyst",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read-cypher": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Analyst",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0f0c93a3-fe7e-4738-9bc3-873ee7d64a1d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f962da71cc3c2bf75c6be8a1677d16974c29e5ce29b76687fb9f2f072416354b"
+  },
+  "id": "iinrfyac2djwCNjm",
+  "tags": []
+}

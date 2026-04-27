@@ -1,0 +1,189 @@
+{
+  "name": "02 Load CISA KEV",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "bcf0f7c1-fe3e-48e2-a814-7bb305b72bee",
+      "name": "When clicking 'Execute workflow'"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/kev/vulnerabilities.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        0
+      ],
+      "id": "32d82d75-0930-4dfe-897f-008f0162027c",
+      "name": "Read KEV"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        0
+      ],
+      "id": "7ab2eb38-cbd1-4f0c-9bb4-00baf407b924",
+      "name": "Parse KEV"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        704,
+        0
+      ],
+      "id": "7d59da48-1cee-4c2e-a3d9-7b44349f1c22",
+      "name": "Split Out KEV"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nfor (const item of $input.all()) {\n  const data = item.json;\n  const records = Array.isArray(data) ? data : [data];\n  for (const record of records) {\n    output.push({ json: record });\n  }\n}\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        0
+      ],
+      "id": "bcbbabe8-56b7-4d2d-af8a-063d098919e8",
+      "name": "Normalize KEV"
+    },
+    {
+      "parameters": {
+        "jsCode": "const all = $input.all();\nconst out = [];\nfor (let offset = 0; offset < all.length; offset += 100) {\n  const batch = all.slice(offset, offset + 100);\n  const rows = batch.map(i => {\n    const r = i.json;\n    const esc = s => String(s||'').replace(/\\\\/g,'\\\\\\\\').replace(/'/g,\"\\\\'\").substring(0,500);\n    return `{cve_id:'${esc(r.cve_id)}',name:'${esc(r.name)}',vendor:'${esc(r.vendor)}',product:'${esc(r.product)}',description:'${esc(r.description)}',date_added:'${esc(r.date_added)}',ransomware_use:'${esc(r.ransomware_use)}'}`;\n  }).join(',');\n  if (!rows) continue;\n  out.push({json: {query:\n`UNWIND [${rows}] AS row\nMERGE (v:Vulnerability {cve_id: row.cve_id})\nSET v.name = row.name, v.vendor = row.vendor, v.product = row.product,\n    v.description = row.description, v.date_added = row.date_added,\n    v.ransomware_use = row.ransomware_use`\n  }});\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        0
+      ],
+      "id": "56eac466-c032-4bd6-a25f-43d997f8bb27",
+      "name": "Build KEV Queries"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://mcpo:8080/neo4j/write-cypher",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1376,
+        0
+      ],
+      "id": "b2c0eb23-1ed6-4b8c-8b12-155e7d0da1de",
+      "name": "MERGE Vulnerability",
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Read KEV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read KEV": {
+      "main": [
+        [
+          {
+            "node": "Parse KEV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse KEV": {
+      "main": [
+        [
+          {
+            "node": "Split Out KEV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out KEV": {
+      "main": [
+        [
+          {
+            "node": "Normalize KEV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize KEV": {
+      "main": [
+        [
+          {
+            "node": "Build KEV Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build KEV Queries": {
+      "main": [
+        [
+          {
+            "node": "MERGE Vulnerability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "87b96875-b664-4367-9e5e-cd78f692ca17",
+  "meta": {
+    "instanceId": "f962da71cc3c2bf75c6be8a1677d16974c29e5ce29b76687fb9f2f072416354b"
+  },
+  "id": "03Rh0Cbz2reP4x3w",
+  "tags": []
+}

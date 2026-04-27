@@ -10,3 +10,6 @@
 [submodule "dataset/stackoverflow"]
 	path = dataset/stackoverflow
 	url = https://github.com/neo4j-graph-examples/stackoverflow.git
+[submodule "utils/mcp"]
+	path = utils/mcp
+	url = https://github.com/neo4j/mcp.git
