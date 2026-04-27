@@ -9,6 +9,7 @@ Neo4j에 MCP 서버를 연결하고, Open WebUI를 통해 자연어로 그래프
 
 - `docker` / `docker compose`
 - `../utils/mcp` 경로에 Neo4j MCP 코드 존재
+- `.env.sample`을 복사해 `.env` 준비
 - `.env`의 LLM 연결 정보 확인
 
 주요 환경 변수:
@@ -25,6 +26,7 @@ Neo4j에 MCP 서버를 연결하고, Open WebUI를 통해 자연어로 그래프
 
 ```bash
 cd practice/ch3_openwebui_mcp
+cp .env.sample .env
 docker compose up -d --build
 ```
 

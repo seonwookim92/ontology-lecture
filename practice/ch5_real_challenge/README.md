@@ -57,6 +57,7 @@ bash scripts/fetch_all.sh
 
 ```bash
 # ch5 디렉토리에서 실행 (docker-compose.yml 준비 후)
+cp .env.sample .env
 docker compose up -d
 ```
 

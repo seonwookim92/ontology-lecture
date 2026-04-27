@@ -46,12 +46,16 @@
    ```bash
    cd practice/ch3_openwebui_mcp
    ```
-2. `.env` 값 확인
-3. 서비스 실행
+2. 필요하면 샘플 파일을 복사해 `.env` 생성
+   ```bash
+   cp .env.sample .env
+   ```
+3. `.env` 값 확인
+4. 서비스 실행
    ```bash
    docker compose up -d --build
    ```
-4. 실습 종료
+5. 실습 종료
    ```bash
    docker compose down
    ```
