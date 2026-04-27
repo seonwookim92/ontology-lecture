@@ -41,8 +41,7 @@ services:
       - NEO4J_LOG_LEVEL=info
       - NEO4J_SCHEMA_SAMPLE_SIZE=10   # 스키마 응답 크기 제한 (컨텍스트 오버플로우 방지)
     depends_on:
-      neo4j:
-        condition: service_healthy
+      - neo4j
     restart: unless-stopped
 
   mcpo:
