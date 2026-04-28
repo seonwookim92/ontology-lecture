@@ -9,7 +9,7 @@
         -208,
         512
       ],
-      "id": "675216ec-ed0d-4171-b457-558ec0325d81",
+      "id": "5e900dbb-dacb-4aee-a018-78e1621186d4",
       "name": "When clicking ‘Execute workflow’"
     },
     {
@@ -23,7 +23,7 @@
         2544,
         784
       ],
-      "id": "92eb54eb-9518-4d06-9bcb-17a36ae75faa",
+      "id": "fadb8b59-3147-4d67-8971-ecdcf145793e",
       "name": "Parse JSON"
     },
     {
@@ -37,7 +37,7 @@
         2336,
         784
       ],
-      "id": "64865c19-362b-4b08-aa03-5a3c4c4bc285",
+      "id": "6570aa6b-fe82-4e48-8113-632292d1f790",
       "name": "Read JSON File",
       "executeOnce": true
     },
@@ -52,7 +52,7 @@
         1056,
         800
       ],
-      "id": "a3732723-3d6e-4f37-8acd-759994e1b1ce",
+      "id": "09eafa3d-913d-4162-8898-22c97cdf0967",
       "name": "Read CSV File",
       "executeOnce": true
     },
@@ -66,7 +66,7 @@
         1264,
         800
       ],
-      "id": "2254783b-93e4-4c98-99ab-e62a8cf5f589",
+      "id": "29880d58-af79-4cc1-a023-ff9db3f12c9a",
       "name": "Parse CSV"
     },
     {
@@ -79,7 +79,7 @@
         1472,
         800
       ],
-      "id": "09c2a656-554c-4922-940d-11053ca8a2ab",
+      "id": "6b5a25c6-0e1a-4b0a-8a9d-77d0b2af51b5",
       "name": "Normalize CSV"
     },
     {
@@ -94,7 +94,7 @@
         0,
         0
       ],
-      "id": "fed6dd50-708d-4ced-ae60-868b5a5acdf0",
+      "id": "d56f1bd6-b47d-487e-85c9-3b69d7e370e5",
       "name": "Sticky Note"
     },
     {
@@ -118,7 +118,7 @@
         64,
         512
       ],
-      "id": "06c4b06a-cce3-46b0-ab8a-84faefb27db4",
+      "id": "92badaa3-faba-4ee8-8e03-e4cc1aad8fb4",
       "name": "Setup Constraints",
       "alwaysOutputData": true
     },
@@ -143,7 +143,7 @@
         64,
         656
       ],
-      "id": "a50cfb85-4d46-4232-8d0a-22c3ed674f3b",
+      "id": "56657972-d108-416d-bfea-71f92b9027ce",
       "name": "Setup Constraints1",
       "alwaysOutputData": true
     },
@@ -168,7 +168,7 @@
         64,
         800
       ],
-      "id": "040d7f42-4a2d-4855-9eff-f69675938772",
+      "id": "97997ece-df2b-4e73-9e22-03ff80e706d3",
       "name": "Setup Constraints2",
       "alwaysOutputData": true
     },
@@ -193,7 +193,7 @@
         272,
         512
       ],
-      "id": "d2d63a37-41a6-4d24-a025-1e36335ab048",
+      "id": "adeeb168-c894-4269-a1a5-0a857accc821",
       "name": "Setup Constraints3",
       "alwaysOutputData": true
     },
@@ -218,7 +218,7 @@
         272,
         656
       ],
-      "id": "d656bdb5-66fc-4048-b070-59d1c7328896",
+      "id": "3df5d095-deff-4c3a-bc22-abb54a7052a7",
       "name": "Setup Constraints4",
       "alwaysOutputData": true
     },
@@ -243,7 +243,7 @@
         272,
         800
       ],
-      "id": "7e16ef65-a74e-497b-970f-efd4dffbf862",
+      "id": "14299b13-4909-42bc-9039-ba6bc788971e",
       "name": "Setup Constraints5",
       "alwaysOutputData": true
     },
@@ -268,7 +268,7 @@
         464,
         512
       ],
-      "id": "6a685a1b-034c-4f30-9688-4a552ab744a8",
+      "id": "75e189f1-560c-4458-8552-bf3406e0612a",
       "name": "Setup Constraints6",
       "alwaysOutputData": true
     },
@@ -293,7 +293,7 @@
         464,
         656
       ],
-      "id": "89055e5e-2404-461c-acbc-bc2244ac362c",
+      "id": "5a12083e-6f16-497d-b8ff-44ada623655e",
       "name": "Setup Constraints7",
       "alwaysOutputData": true
     },
@@ -318,7 +318,7 @@
         464,
         800
       ],
-      "id": "da0842da-7e83-4c72-ba42-2d623b5c7ecc",
+      "id": "186ad806-987c-4afe-847e-9b1d0b9a6589",
       "name": "Setup Constraints8",
       "alwaysOutputData": true
     },
@@ -343,7 +343,7 @@
         656,
         512
       ],
-      "id": "5e3e8000-072d-41e0-96a6-136659e3198c",
+      "id": "3232e552-eecd-448e-a9cc-abc2372e84d8",
       "name": "Setup Constraints9",
       "alwaysOutputData": true
     },
@@ -368,7 +368,7 @@
         656,
         656
       ],
-      "id": "8346f799-eadf-44fb-8470-51532b8cf9e0",
+      "id": "b626ea9a-cd1e-479a-bd9e-069276c7fd63",
       "name": "Setup Constraints10",
       "alwaysOutputData": true
     },
@@ -393,7 +393,7 @@
         656,
         800
       ],
-      "id": "374740fb-083f-4005-94d7-5b19227c9641",
+      "id": "0278efae-dbdc-40aa-ad97-23eec7f494fc",
       "name": "Setup Constraints11",
       "alwaysOutputData": true
     },
@@ -410,7 +410,7 @@
         0,
         352
       ],
-      "id": "6cf1bf76-ed49-4197-8cef-f43902641d0f",
+      "id": "71f47cbd-a5f8-4bf9-972c-cc72244cf88a",
       "name": "Sticky Note1"
     },
     {
@@ -423,7 +423,7 @@
         2960,
         784
       ],
-      "id": "140ff66d-675c-446e-bbe7-e6594a67b54f",
+      "id": "f3138b9b-7e60-40f2-8a7c-1e98f05faa96",
       "name": "Normalize JSON"
     },
     {
@@ -437,7 +437,7 @@
         2752,
         784
       ],
-      "id": "fb75562d-14e2-4859-94d9-ebdb742db83c",
+      "id": "762da47a-8a46-4d86-9095-96b4540673cd",
       "name": "Split JSON"
     },
     {
@@ -544,7 +544,7 @@
         3184,
         752
       ],
-      "id": "65e5ba6e-2d08-4a4c-848e-a40ec4574713",
+      "id": "e93aa891-b6ec-4880-9885-96a002ac2e16",
       "name": "Switch"
     },
     {
@@ -568,7 +568,7 @@
         1872,
         912
       ],
-      "id": "0cbbc98c-e474-4b39-8127-b28c0b685c74",
+      "id": "80bc7e34-257a-4367-8aab-87edba82bcd4",
       "name": "Merge CSV data",
       "alwaysOutputData": true
     },
@@ -593,7 +593,7 @@
         3488,
         576
       ],
-      "id": "365a3110-ca1b-4153-ab43-dad8a38bdf34",
+      "id": "d96d0893-5457-49a6-8037-c31f9060c1bf",
       "name": "Merge JSON domain",
       "alwaysOutputData": true
     },
@@ -618,7 +618,7 @@
         3488,
         720
       ],
-      "id": "e649b4f3-1a3d-4f4c-9266-c476fa82faf5",
+      "id": "06af97ad-5098-4d5c-b158-df29834c2bb2",
       "name": "Merge JSON URL",
       "alwaysOutputData": true
     },
@@ -643,7 +643,7 @@
         3488,
         864
       ],
-      "id": "2fdcb63f-b813-41e0-90e0-5febdc032116",
+      "id": "605f5eb8-6f57-4872-8e41-5475cb32b9d9",
       "name": "Merge JSON IP",
       "alwaysOutputData": true
     },
@@ -668,7 +668,7 @@
         3488,
         1008
       ],
-      "id": "4cf3866b-79d4-4a9e-9a91-baa8d578681b",
+      "id": "ee1d4508-2210-4536-a9c8-1cdb7f324267",
       "name": "Merge JSON FileHash",
       "alwaysOutputData": true
     },
@@ -682,9 +682,10 @@
         3808,
         800
       ],
-      "id": "29e1377b-4bbb-41ce-9d98-65b8cdcc90dc",
+      "id": "900d2186-2bf9-42d7-b818-5456396a66b7",
       "name": "Split Techniques",
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "executeOnce": true
     },
     {
       "parameters": {
@@ -707,9 +708,10 @@
         4016,
         800
       ],
-      "id": "eb98b985-0692-46c3-b399-1c029ecf1045",
+      "id": "e0ac2d85-d5e1-46f5-867b-96cdfa335cf0",
       "name": "Merge JSON Technique",
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "executeOnce": true
     },
     {
       "parameters": {
@@ -724,7 +726,7 @@
         976,
         352
       ],
-      "id": "be976e0c-3db5-4ef9-88e4-ebefc2e12327",
+      "id": "ea4c5995-d838-4fff-a964-51e43f741b0b",
       "name": "Sticky Note2"
     },
     {
@@ -740,7 +742,7 @@
         2240,
         352
       ],
-      "id": "17e03c89-5d03-4355-851b-89a7630ef836",
+      "id": "964027c8-0e3d-45bb-8b73-1141223520d7",
       "name": "Sticky Note3"
     },
     {
@@ -753,7 +755,7 @@
         1680,
         800
       ],
-      "id": "c2420541-74e8-4c14-8875-785fa43620de",
+      "id": "2bd33c84-cf08-4314-b9ed-3473fc909c9f",
       "name": "Loop Over Items"
     }
   ],
@@ -1094,11 +1096,6 @@
           }
         ]
       ]
-    },
-    "Merge JSON Technique": {
-      "main": [
-        []
-      ]
     }
   },
   "active": false,
@@ -1106,10 +1103,10 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "47a9e388-e3da-43fa-aadf-ae6718d3cb9b",
+  "versionId": "aff2410c-125f-4361-ba91-785ca382c852",
   "meta": {
     "instanceId": "35f9e4845be421ac9a8aca490c7c65ecdbde7a281ca2a97b43ca84b735e6214e"
   },
-  "id": "LgfDvST188yNpdPK",
+  "id": "VS6lRTaN4xYIPyGS",
   "tags": []
 }
