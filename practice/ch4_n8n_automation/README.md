@@ -1,7 +1,6 @@
 # CH4 n8n Automation
 
-n8n을 이용해 Neo4j 그래프를 자동 적재하고, MCP/MCPO를 통해 읽기·쓰기 쿼리를 호출하는 실습입니다.  
-이 챕터는 워크플로우 기반 자동화와 간단한 프론트엔드 데모를 함께 다룹니다.
+n8n을 이용해 Neo4j 그래프를 자동 적재하고, MCP/MCPO를 통해 읽기·쓰기 쿼리를 호출하는 실습입니다.
 
 ---
 
@@ -53,11 +52,6 @@ docker compose down
 - `workflows/01_data_ingestion.json`
   CSV/JSON 보안 데이터를 정규화해 Neo4j로 적재하는 실습
 
-프론트엔드:
-
-- `frontend/index.html`
-  간단한 Movie Graph Explorer 데모
-
 데이터:
 
 - `data/`
@@ -99,26 +93,10 @@ docker compose down
 
 ---
 
-## 프론트엔드 데모
-
-`frontend/index.html`은 정적 HTML 데모입니다.
-
-현재 코드 기준 백엔드 주소:
-
-```text
-http://localhost:5678/webhook/movie-assistant
-```
-
-즉, 이 페이지를 그대로 사용하려면 해당 webhook을 제공하는 n8n 워크플로우가 활성화되어 있어야 합니다.  
-현재 `workflows/` 디렉토리의 실제 파일 기준으로는 이 프론트와 1:1로 대응하는 최종 백엔드 JSON이 포함되어 있지 않으므로, 문서상 이 파일은 “데모 UI 예시”로 보는 것이 정확합니다.
-
----
-
 ## 성공 확인
 
 - n8n에서 워크플로우 import가 정상 동작한다.
 - `00_explore_neo4j.json`로 채팅형 탐색이 가능하다.
 - `01_data_ingestion.json` 실행 시 적재용 Cypher 호출이 발생한다.
-- 필요 시 `frontend/index.html`을 열어 webhook 기반 데모 UI 구조를 확인할 수 있다.
 
 다음 챕터에서는 n8n을 중심으로 외부 CTI 데이터를 모으고, 실전형 보안 지식그래프를 구축합니다.

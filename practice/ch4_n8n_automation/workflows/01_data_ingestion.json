@@ -683,7 +683,8 @@
         800
       ],
       "id": "29e1377b-4bbb-41ce-9d98-65b8cdcc90dc",
-      "name": "Split Techniques"
+      "name": "Split Techniques",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -703,8 +704,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        4224,
-        928
+        4016,
+        800
       ],
       "id": "eb98b985-0692-46c3-b399-1c029ecf1045",
       "name": "Merge JSON Technique",
@@ -730,7 +731,7 @@
       "parameters": {
         "content": "## Integrate JSON data\n\n- CTI JSON 피드를 구조화된 threat graph로 통합\n- 외부 인텔리전스 정보를 내부 보안 이벤트(앞 플로우)와 통합하는 것이 목적\n\nNodes Created\n• ThreatIntel (intel_id, source, confidence, first_seen, last_seen)\n• Domain / URL / IPAddress / FileHash (IOC by indicator_type)\n• ThreatActor (name, origin, motivation)\n• Malware (name, malware_type)\n• Campaign (name, description)\n• Technique (technique_id, name, tactic)\n\nRelationships Created\n• ThreatIntel -[:DESCRIBES]-> IOC\n• ThreatIntel -[:ATTRIBUTED_TO]-> ThreatActor\n• ThreatIntel -[:ASSOCIATED_WITH_MALWARE]-> Malware\n• ThreatIntel -[:PART_OF_CAMPAIGN]-> Campaign\n• ThreatIntel -[:REPORTS_TECHNIQUE]-> Technique\n• ThreatActor -[:USES_MALWARE]-> Malware\n• ThreatActor -[:OPERATES_CAMPAIGN]-> Campaign\n• Malware -[:USES_TECHNIQUE]-> Technique",
         "height": 832,
-        "width": 2224,
+        "width": 1984,
         "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
@@ -754,19 +755,6 @@
       ],
       "id": "c2420541-74e8-4c14-8875-785fa43620de",
       "name": "Loop Over Items"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        4016,
-        800
-      ],
-      "id": "86d6d19b-94e1-408e-97de-56d9343c8220",
-      "name": "Loop Over Items1"
     }
   ],
   "pinData": {},
@@ -1027,7 +1015,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items1",
+            "node": "Merge JSON Technique",
             "type": "main",
             "index": 0
           }
@@ -1107,27 +1095,9 @@
         ]
       ]
     },
-    "Loop Over Items1": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Merge JSON Technique",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Merge JSON Technique": {
       "main": [
-        [
-          {
-            "node": "Loop Over Items1",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     }
   },
@@ -1136,7 +1106,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "1caeadde-77c4-4695-b156-91077ecde61f",
+  "versionId": "47a9e388-e3da-43fa-aadf-ae6718d3cb9b",
   "meta": {
     "instanceId": "35f9e4845be421ac9a8aca490c7c65ecdbde7a281ca2a97b43ca84b735e6214e"
   },
