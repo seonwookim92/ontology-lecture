@@ -1,0 +1,59 @@
+name: changie
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".changes/unreleased/**"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-unreleased:
+    runs-on: ubuntu-latest
+    outputs:
+      count: ${{ steps.check.outputs.count }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - id: check
+        run: echo "count=$(find .changes/unreleased -name "*.yaml" | wc -l)" >> $GITHUB_OUTPUT
+
+  generate-pr:
+    needs: check-unreleased
+    if: needs.check-unreleased.outputs.count > 0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Batch changes
+        id: batch
+        uses: miniscruff/changie-action@6dcc2533cac0495148ed4046c438487e4dceaa23 # v2
+        with:
+          version: latest
+          args: batch auto
+
+      - name: Merge changes
+        uses: miniscruff/changie-action@6dcc2533cac0495148ed4046c438487e4dceaa23 # v2
+        with:
+          version: latest
+          args: merge
+
+      - name: Get the latest version
+        id: latest
+        uses: miniscruff/changie-action@6dcc2533cac0495148ed4046c438487e4dceaa23 # v2
+        with:
+          version: latest
+          args: latest
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
+        with:
+          title: Release ${{ steps.latest.outputs.output }}
+          branch: release/${{ steps.latest.outputs.output }}
+          body-path: .changes/${{ steps.latest.outputs.output }}.md
+          commit-message: Release ${{ steps.latest.outputs.output }}
+          token: ${{ env.TOKEN }}
+        env:
+          TOKEN: ${{ secrets.TEAM_GRAPHQL_PERSONAL_ACCESS_TOKEN }}

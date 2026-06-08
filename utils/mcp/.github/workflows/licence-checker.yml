@@ -1,0 +1,23 @@
+name: License
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  license-header-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6
+        with:
+          go-version: "1.26.1"
+      - name: Install addlicense
+        run: go install github.com/google/addlicense@b289835c0741ba2fb92dd5f61af070e79c69a55e # v1.2
+      - name: Run addlicense
+        run: addlicense -f ./addlicense -check $(find . -name "*.go" -type f -print0 | xargs -0)
