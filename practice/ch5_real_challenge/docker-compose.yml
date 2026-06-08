@@ -26,7 +26,6 @@ services:
   neo4j:
     image: neo4j:latest
     container_name: neo4j_ch5
-    platform: linux/arm64
     ports:
       - "7474:7474"   # Browser
       - "7687:7687"   # Bolt
